@@ -36,7 +36,7 @@ const sampleProofs = [
 
 export function PaymentForm({ members, dueDates }: { members: Member[]; dueDates: string[] }) {
   const [selectedMember] = useState(members[0]?.name ?? "");
-  const [selectedDate, setSelectedDate] = useState(dueDates[2] ?? dueDates[0] ?? "");
+  const [selectedDate, setSelectedDate] = useState(dueDates[0] ?? "");
   const [paymentMethod, setPaymentMethod] = useState("");
   const [referenceNumber, setReferenceNumber] = useState("");
   const [notes, setNotes] = useState("");
