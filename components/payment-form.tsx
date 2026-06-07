@@ -44,6 +44,7 @@ export function PaymentForm({ members, dueDates }: { members: Member[]; dueDates
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const selectedMemberDetails = useMemo(() => members.find((member) => member.name === selectedMember), [members, selectedMember]);
   const amountPaid = String(selectedMemberDetails?.weeklyContribution ?? 250);
@@ -62,7 +63,18 @@ export function PaymentForm({ members, dueDates }: { members: Member[]; dueDates
       setReferenceNumber("");
       setNotes("");
       setReceipt(null);
+      if (fileInputRef.current) fileInputRef.current.value = "";
     });
+  }
+
+  function clearForm() {
+    setPaymentMethod("");
+    setReferenceNumber("");
+    setNotes("");
+    setReceipt(null);
+    setMessage(null);
+    setError(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
   }
 
   return (

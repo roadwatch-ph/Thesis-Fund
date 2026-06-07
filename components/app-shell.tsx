@@ -6,7 +6,7 @@ import { formatCurrency } from "@/lib/format";
 
 const navItems = [
   { label: "Dashboard", href: "/", icon: LayoutDashboard },
-  { label: "Upload Payment", href: "/submit", icon: CloudUpload },
+  { label: "Upload Payment", href: "/upload-payment", icon: CloudUpload },
   { label: "My Contributions", href: "/#member-summary", icon: UserCircle },
   { label: "Payment Schedule", href: "/#payment-matrix", icon: CalendarDays },
   { label: "Receipts", href: "/#recent-payments", icon: ReceiptText },
