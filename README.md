@@ -47,7 +47,7 @@ Payment Receipts
 └── Darlene Grace Villanueva
 ```
 
-Uploaded receipts are renamed as `MemberName_DueDate.ext`, for example `JhonLenardDimaano_2026-06-21.jpg`.
+Uploaded receipts are renamed as `MemberName_DueDate.ext`, for example `JhonLenardDimaano_2026-06-07.jpg`.
 
 ## Environment variables
 
