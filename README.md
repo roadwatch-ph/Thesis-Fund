@@ -2,18 +2,6 @@
 
 A modern, production-ready Next.js application for tracking weekly GCash contributions for a five-member organization from **June 7, 2026** through **December 27, 2026**.
 
-
-## If you see this README instead of the dashboard
-
-You are opening a static repository/README preview, not the Next.js application server. The real application is in the `app/`, `components/`, and `lib/` folders and must be started with Next.js:
-
-```bash
-npm install
-npm run dev
-```
-
-Then open [http://localhost:3000](http://localhost:3000). A root `index.html` is included only as a static preview fallback for hosts that otherwise show this README page.
-
 ## Features
 
 - Admin dashboard with collection, paid, pending, and missing-payment statistics.
@@ -24,22 +12,6 @@ Then open [http://localhost:3000](http://localhost:3000). A root `index.html` is
 - Google Sheets integration using `Members`, `Schedule`, and `Payments` sheets.
 - Receipt viewer modal with Google Drive link and verification action.
 - Responsive Stripe/Notion-inspired interface with white surfaces, blue accents, rounded cards, and soft shadows.
-
-
-## Google Apps Script option
-
-If you prefer to run the backend directly inside Google Sheets, copy the full script from `google-apps-script/Code.gs` into **Google Sheets > Extensions > Apps Script**.
-
-Recommended setup:
-
-1. Open your Google Sheet.
-2. Go to **Extensions > Apps Script**.
-3. Delete the starter code and paste everything from `google-apps-script/Code.gs`.
-4. Save the Apps Script project.
-5. Run `setupContributionTracker()` once and approve permissions.
-6. Optional: Deploy it as a Web App if you want to call it from the Next.js UI or another frontend.
-
-The script creates the `Members`, `Schedule`, and `Payments` sheets, creates the Drive folder structure, accepts payment submissions, uploads receipt blobs to the correct member folder, marks payments as `Paid`, and returns dashboard JSON.
 
 ## Google Sheets database structure
 

@@ -39,7 +39,7 @@ export function PaymentForm({ members, dueDates }: { members: Member[]; dueDates
         <div>
           <p className="text-sm font-bold uppercase tracking-wide text-brand-600">Simple payment submission</p>
           <h2 className="mt-2 text-2xl font-bold tracking-tight">Upload GCash Receipt</h2>
-          <p className="mt-2 max-w-2xl text-slate-500">The system uploads the receipt to the member&apos;s Google Drive folder, saves the receipt URL to Google Sheets, and marks the selected due date as Paid.</p>
+          <p className="mt-2 max-w-2xl text-slate-500">The system uploads the receipt to the member's Google Drive folder, saves the receipt URL to Google Sheets, and marks the selected due date as Paid.</p>
         </div>
 
         <div className="mt-8 grid gap-5 md:grid-cols-2">
