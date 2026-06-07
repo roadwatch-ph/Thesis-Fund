@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>GCash Contribution Tracking System</title>
-    <meta name="description" content="Static preview fallback for the Next.js GCash Contribution Tracking System." />
+    <meta name="description" content="Online GCash Contribution Tracking System with payment submission through Google Apps Script." />
     <style>
       :root {
         --blue: #1456f1;
@@ -57,6 +57,10 @@
       .toolbar { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 18px; }
       select, button, .button { border: 1px solid var(--line); border-radius: 14px; background: white; padding: 11px 14px; color: var(--ink); font-weight: 700; }
       .button.primary { background: var(--blue); color: white; border-color: var(--blue); box-shadow: 0 18px 35px rgba(20, 86, 241, .22); }
+      .button.primary:disabled { opacity: .6; cursor: wait; box-shadow: none; }
+      .form-message { margin-top: 16px; padding: 13px 14px; border-radius: 14px; font-weight: 800; font-size: 14px; }
+      .form-message.success { color: #166534; background: #dcfce7; border: 1px solid #86efac; }
+      .form-message.error { color: #991b1b; background: #fee2e2; border: 1px solid #fecaca; }
       .table-wrap { overflow: auto; border: 1px solid var(--line); border-radius: 18px; }
       table { width: 100%; border-collapse: collapse; min-width: 1100px; font-size: 14px; }
       th { text-align: left; background: #f8fafc; color: #475569; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; }
@@ -129,19 +133,20 @@
         </section>
         <section class="content page" id="upload-payment-page" hidden>
           <div class="upload-layout">
-            <form class="card section" id="static-payment-form">
+            <form class="card section" id="payment-form">
               <h2>Payment Information</h2>
               <p class="subtitle">Fill out your payment details and attach a clear proof of payment.</p>
+              <p class="notice">This website submits payments online through the connected Google Apps Script backend. No local server is required on GitHub Pages.</p>
               <div class="form-grid" style="margin-top:22px">
-                <label><span>Member Name</span><select required><option value="">Select member</option><option>Jhon Lenard Dimaano</option><option>Prince Johnel Abe</option><option>Michael Orilla</option><option>Carmela Elaine Agrao</option><option>Darlene Grace Villanueva</option></select></label>
-                <label><span>Due Date</span><select required><option>June 7, 2026 (Sunday)</option><option>June 14, 2026 (Sunday)</option><option>June 21, 2026 (Sunday)</option></select></label>
-                <label><span>Payment Method</span><select required><option value="">Select payment method</option><option>GCash</option><option>Bank Transfer</option><option>Cash</option></select></label>
-                <label><span>Amount Paid</span><input type="number" min="100" step="1" value="100" required /></label>
-                <label><span>Reference Number</span><input type="text" placeholder="Enter GCash or bank reference number" required /></label>
-                <label><span>Notes (Optional)</span><textarea placeholder="Add any notes about your payment"></textarea></label>
+                <label><span>Member Name</span><select name="memberName" required><option value="">Select member</option><option>Jhon Lenard Dimaano</option><option>Prince Johnel Abe</option><option>Michael Orilla</option><option>Carmela Elaine Agrao</option><option>Darlene Grace Villanueva</option></select></label>
+                <label><span>Due Date</span><select name="dueDate" required><option value="2026-06-07">June 7, 2026 (Sunday)</option><option value="2026-06-14">June 14, 2026 (Sunday)</option><option value="2026-06-21">June 21, 2026 (Sunday)</option><option value="2026-06-28">June 28, 2026 (Sunday)</option><option value="2026-07-05">July 5, 2026 (Sunday)</option><option value="2026-07-12">July 12, 2026 (Sunday)</option><option value="2026-07-19">July 19, 2026 (Sunday)</option><option value="2026-07-26">July 26, 2026 (Sunday)</option><option value="2026-08-02">August 2, 2026 (Sunday)</option><option value="2026-08-09">August 9, 2026 (Sunday)</option><option value="2026-08-16">August 16, 2026 (Sunday)</option><option value="2026-08-23">August 23, 2026 (Sunday)</option><option value="2026-08-30">August 30, 2026 (Sunday)</option><option value="2026-09-06">September 6, 2026 (Sunday)</option><option value="2026-09-13">September 13, 2026 (Sunday)</option><option value="2026-09-20">September 20, 2026 (Sunday)</option><option value="2026-09-27">September 27, 2026 (Sunday)</option><option value="2026-10-04">October 4, 2026 (Sunday)</option><option value="2026-10-11">October 11, 2026 (Sunday)</option><option value="2026-10-18">October 18, 2026 (Sunday)</option><option value="2026-10-25">October 25, 2026 (Sunday)</option><option value="2026-11-01">November 1, 2026 (Sunday)</option><option value="2026-11-08">November 8, 2026 (Sunday)</option><option value="2026-11-15">November 15, 2026 (Sunday)</option><option value="2026-11-22">November 22, 2026 (Sunday)</option><option value="2026-11-29">November 29, 2026 (Sunday)</option><option value="2026-12-06">December 6, 2026 (Sunday)</option><option value="2026-12-13">December 13, 2026 (Sunday)</option><option value="2026-12-20">December 20, 2026 (Sunday)</option><option value="2026-12-27">December 27, 2026 (Sunday)</option></select></label>
+                <label><span>Payment Method</span><select name="paymentMethod" required><option value="">Select payment method</option><option>GCash</option><option>Bank Transfer</option><option>Cash</option></select></label>
+                <label><span>Amount Paid</span><input name="amountPaid" type="number" min="100" step="1" value="100" required /></label>
+                <label><span>Reference Number</span><input name="referenceNumber" type="text" placeholder="Enter GCash or bank reference number" required /></label>
+                <label><span>Notes (Optional)</span><textarea name="notes" placeholder="Add any notes about your payment"></textarea></label>
               </div>
-              <label class="upload-drop"><span><strong>Click to upload</strong> or drag and drop<br />PNG, JPG, JPEG, or PDF up to 5MB</span><input type="file" accept="image/png,image/jpeg,.pdf" required /></label>
-              <div class="form-actions"><button type="reset">Cancel</button><button class="button primary" type="submit">Submit Payment</button></div>
+              <label class="upload-drop"><span><strong>Click to upload</strong> or drag and drop<br />PNG, JPG, JPEG, or PDF up to 5MB</span><input name="receipt" type="file" accept="image/png,image/jpeg,.pdf" required /></label>
+              <div class="form-actions"><button type="reset">Cancel</button><button class="button primary" type="submit">Submit Payment</button></div><div class="form-message" id="payment-message" hidden></div>
             </form>
             <aside class="card section">
               <h2>Upload Guidelines</h2>
@@ -184,9 +189,82 @@
         }
       }
 
-      document.getElementById("static-payment-form").addEventListener("submit", (event) => {
+      const appsScriptUrl = "https://script.google.com/macros/s/AKfycbxnaQnzv3VgLqxrxaAo4strOu1EOiEumW643WMhaSIGEXNaYxNG73v7Cgk1upEK0bL5RA/exec";
+      const paymentForm = document.getElementById("payment-form");
+      const paymentMessage = document.getElementById("payment-message");
+
+      function setPaymentMessage(type, text) {
+        paymentMessage.hidden = false;
+        paymentMessage.className = `form-message ${type}`;
+        paymentMessage.textContent = text;
+      }
+
+      function readFileAsDataUrl(file) {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(String(reader.result || ""));
+          reader.onerror = () => reject(new Error("Hindi mabasa ang receipt file. Pakisubukan ulit."));
+          reader.readAsDataURL(file);
+        });
+      }
+
+      paymentForm.addEventListener("submit", async (event) => {
         event.preventDefault();
-        alert("Static preview only. Run npm run dev and use /upload-payment to submit real payments.");
+        paymentMessage.hidden = true;
+
+        const submitButton = paymentForm.querySelector('button[type="submit"]');
+        const formData = new FormData(paymentForm);
+        const receipt = formData.get("receipt");
+
+        if (!(receipt instanceof File) || !receipt.name) {
+          setPaymentMessage("error", "Paki-upload muna ang proof of payment.");
+          return;
+        }
+
+        const allowedTypes = new Set(["image/png", "image/jpeg", "application/pdf"]);
+        if (!allowedTypes.has(receipt.type)) {
+          setPaymentMessage("error", "PNG, JPG, JPEG, o PDF lang ang puwedeng i-upload.");
+          return;
+        }
+
+        if (receipt.size > 5 * 1024 * 1024) {
+          setPaymentMessage("error", "Maximum na 5MB lang ang receipt file.");
+          return;
+        }
+
+        submitButton.disabled = true;
+        submitButton.textContent = "Submitting...";
+
+        try {
+          const fileDataUrl = await readFileAsDataUrl(receipt);
+          const payload = {
+            action: "submitPayment",
+            memberName: String(formData.get("memberName") || ""),
+            dueDate: String(formData.get("dueDate") || ""),
+            amountPaid: Number(formData.get("amountPaid") || 0),
+            referenceNumber: String(formData.get("referenceNumber") || ""),
+            paymentMethod: String(formData.get("paymentMethod") || ""),
+            notes: String(formData.get("notes") || ""),
+            fileName: receipt.name,
+            mimeType: receipt.type || "application/octet-stream",
+            fileBase64: fileDataUrl,
+          };
+
+          await fetch(appsScriptUrl, {
+            method: "POST",
+            mode: "no-cors",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify(payload),
+          });
+
+          paymentForm.reset();
+          setPaymentMessage("success", "Na-submit na ang payment online. Na-upload ang receipt request sa system para ma-record sa Google Sheet/Drive.");
+        } catch (error) {
+          setPaymentMessage("error", error instanceof Error ? error.message : "Hindi na-submit ang payment. Pakisubukan ulit.");
+        } finally {
+          submitButton.disabled = false;
+          submitButton.textContent = "Submit Payment";
+        }
       });
       window.addEventListener("hashchange", renderPage);
       renderPage();
