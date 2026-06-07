@@ -119,27 +119,32 @@ function doGet(event) {
 }
 
 function doPost(event) {
-  const payload = parsePayload_(event);
-  const action = payload.action || 'submitPayment';
+  try {
+    const payload = parsePayload_(event);
+    const action = payload.action || 'submitPayment';
 
-  if (action === 'setup') {
-    return json_(setupContributionTracker());
+    if (action === 'setup') {
+      return json_(setupContributionTracker());
+    }
+
+    if (action === 'verifyPayment') {
+      return json_(verifyPayment_(payload.referenceNumber, payload.dueDate, payload.memberName));
+    }
+
+    if (action === 'submitPayment') {
+      return json_(submitPayment_(payload));
+    }
+
+    return json_({ error: 'Unknown action: ' + action }, 400);
+  } catch (error) {
+    return json_({ error: error.message || 'Unable to process request.' }, 500);
   }
-
-  if (action === 'verifyPayment') {
-    return json_(verifyPayment_(payload.referenceNumber, payload.dueDate, payload.memberName));
-  }
-
-  if (action === 'submitPayment') {
-    return json_(submitPayment_(payload));
-  }
-
-  return json_({ error: 'Unknown action: ' + action }, 400);
 }
 
 function submitPayment_(payload) {
   validatePaymentPayload_(payload);
 
+  const referenceNumber = normalizeReferenceNumber_(payload.referenceNumber);
   const receipt = payload.receiptLink ? {
     id: String(payload.receiptFileId || ''),
     name: String(payload.receiptFileName || payload.fileName || ''),
@@ -151,7 +156,7 @@ function submitPayment_(payload) {
     dueDate: payload.dueDate,
     paymentMethod: payload.paymentMethod,
     amountPaid: Number(payload.amountPaid),
-    referenceNumber: String(payload.referenceNumber),
+    referenceNumber: referenceNumber,
     notes: String(payload.notes || ''),
     receiptFileName: receipt.name,
     receiptFileId: receipt.id,
@@ -188,10 +193,12 @@ function verifyPayment_(referenceNumber, dueDate, memberName) {
   const sheet = ensurePaymentSheet_();
   const values = sheet.getDataRange().getValues();
   const headers = values[0].map(function (header) { return normalizeHeader_(header); });
+  const normalizedReference = normalizeReferenceNumber_(referenceNumber);
+  const shouldMatchReference = normalizedReference !== 'Not provided';
 
   for (var row = 1; row < values.length; row += 1) {
     const payment = paymentFromRow_(values[row], headers);
-    const matchesReference = String(payment.referenceNumber) === String(referenceNumber);
+    const matchesReference = !shouldMatchReference || String(payment.referenceNumber) === normalizedReference;
     const matchesDate = !dueDate || payment.dueDate === String(dueDate);
     const matchesMember = !memberName || payment.memberName === String(memberName);
 
@@ -373,7 +380,7 @@ function normalizePaymentStatus_(status) {
 }
 
 function validatePaymentPayload_(payload) {
-  const required = ['memberName', 'dueDate', 'paymentMethod', 'amountPaid', 'referenceNumber'];
+  const required = ['memberName', 'dueDate', 'paymentMethod', 'amountPaid'];
   required.forEach(function (field) {
     if (payload[field] === undefined || payload[field] === null || payload[field] === '') {
       throw new Error('Missing required field: ' + field);
@@ -409,6 +416,11 @@ function ensurePaymentSheet_() {
   }
 
   return sheet;
+}
+
+function normalizeReferenceNumber_(referenceNumber) {
+  const value = String(referenceNumber || '').trim();
+  return value || 'Not provided';
 }
 
 function parsePayload_(event) {
