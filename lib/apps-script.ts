@@ -1,16 +1,13 @@
-import { buildDashboardData } from "@/lib/mock-data";
 import type { DashboardData, Payment, PaymentStatus } from "@/lib/types";
-
-const DEFAULT_APPS_SCRIPT_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxnaQnzv3VgLqxrxaAo4strOu1EOiEumW643WMhaSIGEXNaYxNG73v7Cgk1upEK0bL5RA/exec";
 
 const VALID_PAYMENT_STATUSES = new Set<PaymentStatus>(["Paid", "Pending", "Missing"]);
 
 export function getAppsScriptWebAppUrl() {
-  return process.env.GOOGLE_APPS_SCRIPT_WEB_APP_URL?.trim() || DEFAULT_APPS_SCRIPT_WEB_APP_URL;
+  return process.env.GOOGLE_APPS_SCRIPT_WEB_APP_URL?.trim() || "";
 }
 
 export function hasAppsScriptWebAppUrl() {
-  return Boolean(getAppsScriptWebAppUrl());
+  return getAppsScriptWebAppUrl().length > 0;
 }
 
 type AppsScriptResponse<T> = T & {
@@ -114,8 +111,4 @@ export async function verifyAppsScriptPayment(params: Pick<Payment, "referenceNu
     method: "POST",
     body: JSON.stringify({ action: "verifyPayment", ...params }),
   });
-}
-
-export function fallbackDashboardData() {
-  return buildDashboardData();
 }

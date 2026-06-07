@@ -1,11 +1,11 @@
 import { MEMBERS, SHEET_NAMES, WEEKLY_DUE_DATES } from "@/lib/constants";
-import { getAppsScriptDashboardData } from "@/lib/apps-script";
+import { getAppsScriptDashboardData, hasAppsScriptWebAppUrl } from "@/lib/apps-script";
 import { buildDashboardData } from "@/lib/mock-data";
 import { getLocalPayments } from "@/lib/local-store";
 import type { DashboardData, Payment } from "@/lib/types";
 
 export async function getDashboardData(): Promise<DashboardData> {
-  if (process.env.DISABLE_APPS_SCRIPT_BACKEND !== "true") {
+  if (process.env.DISABLE_APPS_SCRIPT_BACKEND !== "true" && hasAppsScriptWebAppUrl()) {
     try {
       return await getAppsScriptDashboardData();
     } catch (error) {

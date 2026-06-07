@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { setupAppsScriptTracker, verifyAppsScriptPayment } from "@/lib/apps-script";
+import { hasAppsScriptWebAppUrl, setupAppsScriptTracker, verifyAppsScriptPayment } from "@/lib/apps-script";
 import { seedSpreadsheetStructure } from "@/lib/google";
 import { verifyLocalPayment } from "@/lib/local-store";
 
@@ -14,7 +14,7 @@ export async function POST(request: Request) {
         memberName: String(payload.memberName || ""),
       };
 
-      if (process.env.DISABLE_APPS_SCRIPT_BACKEND !== "true") {
+      if (process.env.DISABLE_APPS_SCRIPT_BACKEND !== "true" && hasAppsScriptWebAppUrl()) {
         try {
           const result = await verifyAppsScriptPayment(params);
           return NextResponse.json(result);
@@ -27,7 +27,7 @@ export async function POST(request: Request) {
       return NextResponse.json(result);
     }
 
-    if (process.env.DISABLE_APPS_SCRIPT_BACKEND !== "true") {
+    if (process.env.DISABLE_APPS_SCRIPT_BACKEND !== "true" && hasAppsScriptWebAppUrl()) {
       try {
         const result = await setupAppsScriptTracker();
         return NextResponse.json(result);
