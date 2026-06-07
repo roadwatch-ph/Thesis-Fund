@@ -9,7 +9,7 @@ A modern, production-ready Next.js application for tracking weekly GCash contrib
 - Per-member contribution summaries with progress, paid weeks, remaining balance, last payment, and next due date.
 - Simple payment submission form with receipt upload.
 - Google Drive integration for member-specific receipt folders.
-- Google Sheets integration using `Members`, `Schedule`, and `Payments` sheets.
+- Google Sheets integration using `Members`, `Schedule`, and `Payments` sheets; the `Payments` sheet starts empty until members upload receipts.
 - Receipt viewer modal with Google Drive link and verification action.
 - Responsive Stripe/Notion-inspired interface with white surfaces, blue accents, rounded cards, and soft shadows.
 
@@ -76,7 +76,7 @@ Open [http://localhost:3000](http://localhost:3000).
 
 ## Preparing Google Sheets
 
-After configuring the Apps Script URL (or direct Google API credentials), call this endpoint once to create the expected sheets, Drive folders, and seed the member/schedule headers:
+After configuring the Apps Script URL (or direct Google API credentials), call this endpoint once to create the expected sheets, Drive folders, and seed only the member/schedule headers. Payment rows are not seeded, so the dashboard starts with ₱0 collected and no recent payments until uploads are submitted:
 
 ```bash
 curl -X POST http://localhost:3000/api/verify

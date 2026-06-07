@@ -89,7 +89,7 @@ export function DashboardClient({ data }: { data: DashboardData }) {
           <div className="card p-6">
             <h2 className="text-lg font-bold">Upcoming Due Dates</h2>
             <div className="mt-4 space-y-4">
-              {upcomingDates.map((date, index) => (
+              {upcomingDates.map((date) => (
                 <div key={date} className="flex items-center justify-between gap-3">
                   <div className="flex items-center gap-3"><CalendarDays className="h-5 w-5 text-slate-500" /><div><p className="font-semibold">{formatDate(date)} (Sun)</p><p className="text-xs text-slate-500">Week {data.dueDates.indexOf(date) + 1}</p></div></div>
                   <span className="rounded-full bg-orange-50 px-3 py-1 text-sm font-bold text-orange-600">₱250</span>
@@ -123,12 +123,18 @@ export function DashboardClient({ data }: { data: DashboardData }) {
         <div id="recent-payments" className="card p-5 md:p-6">
           <div className="flex items-center justify-between"><h2 className="text-lg font-bold">Recent Payments</h2><Link href="/submit" className="text-sm font-bold text-brand-700">Upload</Link></div>
           <div className="mt-5 divide-y divide-slate-100">
-            {recentPayments.map((payment) => (
+            {recentPayments.length ? recentPayments.map((payment) => (
               <button key={`${payment.memberName}-${payment.dueDate}-${payment.referenceNumber}`} onClick={() => setReceipt(payment)} className="flex w-full items-center justify-between gap-4 py-4 text-left hover:bg-slate-50">
                 <div className="flex items-center gap-3"><ReceiptIcon /><div><p className="font-semibold">{payment.memberName}</p><p className="text-sm text-slate-500">{formatDate(payment.dueDate, "MMM d, yyyy")} · Ref: {payment.referenceNumber}</p></div></div>
                 <div className="text-right"><p className="font-bold">{formatCurrency(payment.amountPaid)}</p><p className="text-xs text-emerald-600">{payment.status}</p></div>
               </button>
-            ))}
+            )) : (
+              <div className="rounded-3xl border border-dashed border-slate-200 bg-slate-50 px-5 py-8 text-center">
+                <ReceiptIcon />
+                <p className="mt-4 font-semibold text-slate-800">No payment uploads yet</p>
+                <p className="mt-1 text-sm text-slate-500">Submitted receipts will appear here once members upload their proof of payment.</p>
+              </div>
+            )}
           </div>
         </div>
       </section>
