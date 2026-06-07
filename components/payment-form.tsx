@@ -29,9 +29,9 @@ const uploadGuidelines = [
 ];
 
 const sampleProofs = [
-  { title: "Bank Transfer", accent: "bg-slate-50", label: "₱250.00", sublabel: "Bank receipt" },
-  { title: "GCash Payment", accent: "bg-blue-600", label: "PHP 250.00", sublabel: "GCash" },
-  { title: "Maya Receipt", accent: "bg-slate-950", label: "₱250.00", sublabel: "maya" },
+  { title: "Bank Transfer", accent: "bg-slate-50", label: "₱100.00", sublabel: "Bank receipt" },
+  { title: "GCash Payment", accent: "bg-blue-600", label: "PHP 100.00", sublabel: "GCash" },
+  { title: "Maya Receipt", accent: "bg-slate-950", label: "₱100.00", sublabel: "maya" },
 ];
 
 export function PaymentForm({ members, dueDates }: { members: Member[]; dueDates: string[] }) {
@@ -47,7 +47,7 @@ export function PaymentForm({ members, dueDates }: { members: Member[]; dueDates
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const selectedMemberDetails = useMemo(() => members.find((member) => member.name === selectedMember), [members, selectedMember]);
-  const amountPaid = String(selectedMemberDetails?.weeklyContribution ?? 250);
+  const amountPaid = String(selectedMemberDetails?.weeklyContribution ?? 100);
 
   function submitPayment(formData: FormData) {
     setMessage(null);
