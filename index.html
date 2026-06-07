@@ -61,6 +61,7 @@
       .form-message { margin-top: 16px; padding: 13px 14px; border-radius: 14px; font-weight: 800; font-size: 14px; }
       .form-message.success { color: #166534; background: #dcfce7; border: 1px solid #86efac; }
       .form-message.info { color: #1e3a8a; background: #dbeafe; border: 1px solid #93c5fd; }
+      .form-message.warning { color: #92400e; background: #fef3c7; border: 1px solid #fcd34d; }
       .form-message.error { color: #991b1b; background: #fee2e2; border: 1px solid #fecaca; }
       .table-wrap { overflow: auto; border: 1px solid var(--line); border-radius: 18px; }
       table { width: 100%; border-collapse: collapse; min-width: 1100px; font-size: 14px; }
@@ -191,6 +192,7 @@
       }
 
       const appsScriptUrl = "https://script.google.com/macros/s/AKfycbxnaQnzv3VgLqxrxaAo4strOu1EOiEumW643WMhaSIGEXNaYxNG73v7Cgk1upEK0bL5RA/exec";
+      const appsScriptTroubleshooting = "I-check kung latest version ang naka-deploy, access ay 'Anyone', execute as 'Me', at tama ang URL sa index.html.";
       const paymentForm = document.getElementById("payment-form");
       const paymentMessage = document.getElementById("payment-message");
 
@@ -219,7 +221,7 @@
           const script = document.createElement("script");
           const timeout = window.setTimeout(() => {
             cleanup();
-            reject(new Error("Hindi makumpirma ang record sa Google Sheet. Pakitingnan ang internet connection at Apps Script deployment."));
+            reject(new Error(`Hindi makumpirma ang response mula sa Google Apps Script. ${appsScriptTroubleshooting}`));
           }, timeoutMs);
 
           function cleanup() {
@@ -235,13 +237,18 @@
 
           const url = new URL(appsScriptUrl);
           Object.entries({ ...params, callback: callbackName }).forEach(([key, value]) => url.searchParams.set(key, value));
+          script.referrerPolicy = "no-referrer";
           script.onerror = () => {
             cleanup();
-            reject(new Error("Hindi maabot ang Google Apps Script para ma-verify ang submission."));
+            reject(new Error(`Hindi maabot ang Google Apps Script. ${appsScriptTroubleshooting}`));
           };
           script.src = url.toString();
           document.head.appendChild(script);
         });
+      }
+
+      async function checkAppsScriptAvailability() {
+        await requestJsonp({ action: "dashboard" }, 10000);
       }
 
       async function verifyRecordedPayment(payload) {
@@ -287,6 +294,7 @@
         setPaymentMessage("info", "Ipinapadala ang payment at pagkatapos ay ive-verify sa Google Sheet...");
 
         try {
+          await checkAppsScriptAvailability();
           const fileDataUrl = await readFileAsDataUrl(receipt);
           const payload = {
             action: "submitPayment",
@@ -308,9 +316,13 @@
             body: JSON.stringify(payload),
           });
 
-          await verifyRecordedPayment(payload);
-          paymentForm.reset();
-          setPaymentMessage("success", "Confirmed: na-record na ang payment sa Google Sheet at na-upload ang receipt sa Google Drive.");
+          try {
+            await verifyRecordedPayment(payload);
+            paymentForm.reset();
+            setPaymentMessage("success", "Confirmed: na-record na ang payment sa Google Sheet at na-upload ang receipt sa Google Drive.");
+          } catch (verifyError) {
+            setPaymentMessage("warning", `Naipadala ang request, pero hindi pa ma-confirm kung may bagong row sa Google Sheet. Huwag munang mag-double submit; pakicheck muna ang Sheet/Drive at Apps Script executions. ${verifyError instanceof Error ? verifyError.message : ""}`);
+          }
         } catch (error) {
           setPaymentMessage("error", error instanceof Error ? error.message : "Hindi na-submit ang payment. Pakisubukan ulit.");
         } finally {
