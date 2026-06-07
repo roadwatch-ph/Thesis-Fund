@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
-import { BarChart3, CalendarDays, CloudUpload, FileText, LayoutDashboard, LogOut, Menu, ReceiptText, UserCircle } from "lucide-react";
+import { BarChart3, CalendarDays, ChevronDown, CloudUpload, LayoutDashboard, LogOut, Menu, ReceiptText, UserCircle } from "lucide-react";
 import { DEFAULT_WEEKLY_CONTRIBUTION } from "@/lib/constants";
 import { formatCurrency } from "@/lib/format";
 
@@ -13,7 +13,14 @@ const navItems = [
   { label: "Summary", href: "/#collection-summary", icon: BarChart3 },
 ];
 
+const pageSubtitles: Record<string, string> = {
+  Dashboard: "Overview of all member payments",
+  "Upload Payment": "Submit your weekly contribution payment",
+};
+
 export function AppShell({ children, active = "Dashboard" }: { children: ReactNode; active?: string }) {
+  const subtitle = pageSubtitles[active] ?? "Overview of all member payments";
+
   return (
     <div className="min-h-screen bg-slate-50 text-ink">
       <aside className="fixed inset-y-0 left-0 z-30 hidden w-72 border-r border-slate-200/80 bg-white/90 px-5 py-7 backdrop-blur xl:block">
@@ -58,14 +65,14 @@ export function AppShell({ children, active = "Dashboard" }: { children: ReactNo
             <button className="rounded-2xl p-2 text-slate-600 hover:bg-slate-100 xl:hidden"><Menu className="h-6 w-6" /></button>
             <div>
               <h1 className="text-2xl font-bold tracking-tight md:text-3xl">{active}</h1>
-              <p className="text-sm text-slate-500">Overview of all member payments</p>
+              <p className="text-sm text-slate-500">{subtitle}</p>
             </div>
           </div>
           <div className="hidden items-center gap-4 md:flex">
-            <button className="rounded-2xl p-3 text-slate-600 hover:bg-slate-100"><FileText className="h-5 w-5" /></button>
-            <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-3 py-2">
-              <UserCircle className="h-8 w-8 text-slate-500" />
+            <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-3 py-2 shadow-sm">
+              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-sm font-bold text-slate-900">A</div>
               <div><p className="text-sm font-bold">Admin</p><p className="text-xs text-slate-500">Administrator</p></div>
+              <ChevronDown className="ml-4 h-4 w-4 text-slate-600" />
             </div>
           </div>
         </header>

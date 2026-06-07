@@ -8,11 +8,11 @@ export async function POST(request: Request) {
     const formData = await request.formData();
     const memberName = String(formData.get("memberName") ?? "").trim();
     const dueDate = String(formData.get("dueDate") ?? "").trim();
-    const referenceNumber = String(formData.get("referenceNumber") ?? "").trim();
+    const referenceNumber = String(formData.get("referenceNumber") ?? "").trim() || "Not provided";
     const amountPaid = Number(formData.get("amountPaid"));
     const receipt = formData.get("receipt");
 
-    if (!memberName || !dueDate || !referenceNumber || !amountPaid || !(receipt instanceof File)) {
+    if (!memberName || !dueDate || !amountPaid || !(receipt instanceof File)) {
       return NextResponse.json({ message: "Please complete all required payment fields." }, { status: 400 });
     }
 
