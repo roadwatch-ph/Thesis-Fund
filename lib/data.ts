@@ -1,8 +1,17 @@
 import { MEMBERS, SHEET_NAMES, WEEKLY_DUE_DATES } from "@/lib/constants";
+import { getAppsScriptDashboardData } from "@/lib/apps-script";
 import { buildDashboardData, seededPayments } from "@/lib/mock-data";
 import type { DashboardData, Payment } from "@/lib/types";
 
 export async function getDashboardData(): Promise<DashboardData> {
+  if (process.env.DISABLE_APPS_SCRIPT_BACKEND !== "true") {
+    try {
+      return await getAppsScriptDashboardData();
+    } catch (error) {
+      console.error("Unable to load dashboard data from Google Apps Script.", error);
+    }
+  }
+
   const spreadsheetId = process.env.GOOGLE_SHEETS_SPREADSHEET_ID;
   const hasGoogleCredentials = process.env.GOOGLE_CLIENT_EMAIL && process.env.GOOGLE_PRIVATE_KEY && spreadsheetId;
 
