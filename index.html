@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>GCash Contribution Tracking System</title>
+    <meta name="description" content="Static preview fallback for the Next.js GCash Contribution Tracking System." />
+    <style>
+      :root {
+        --blue: #1456f1;
+        --blue-dark: #0f3fb7;
+        --ink: #0f172a;
+        --muted: #64748b;
+        --line: #e2e8f0;
+        --soft: #f8fafc;
+        --green: #22c55e;
+        --orange: #f59e0b;
+        --red: #ef4444;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      * { box-sizing: border-box; }
+      body { margin: 0; color: var(--ink); background: radial-gradient(circle at top left, rgba(20, 86, 241, .08), transparent 30%), #f8fafc; }
+      a { color: inherit; text-decoration: none; }
+      .app { min-height: 100vh; display: grid; grid-template-columns: 292px minmax(0, 1fr); }
+      .sidebar { position: sticky; top: 0; height: 100vh; padding: 28px 20px; border-right: 1px solid var(--line); background: rgba(255,255,255,.92); backdrop-filter: blur(16px); }
+      .brand { display: flex; gap: 13px; align-items: center; }
+      .logo { width: 48px; height: 48px; border-radius: 18px; display: grid; place-items: center; color: white; font-weight: 900; font-size: 25px; background: linear-gradient(135deg, #2f7cff, #0646d8); box-shadow: 0 16px 30px rgba(20, 86, 241, .25); }
+      .brand strong { display: block; font-size: 15px; letter-spacing: .02em; }
+      .brand span { display: block; margin-top: 3px; color: var(--muted); font-size: 13px; }
+      .nav { margin-top: 40px; display: grid; gap: 8px; }
+      .nav a { display: flex; gap: 14px; align-items: center; border-radius: 16px; padding: 13px 16px; color: #334155; font-weight: 700; font-size: 14px; }
+      .nav a.active, .nav a:hover { background: #eff6ff; color: var(--blue); }
+      .details { position: absolute; left: 20px; right: 20px; bottom: 92px; padding: 20px; border: 1px solid #bfdbfe; border-radius: 24px; background: linear-gradient(135deg, #eff6ff, white); box-shadow: 0 10px 30px rgba(15, 23, 42, .06); }
+      .details h3 { margin: 0 0 18px; color: var(--blue); font-size: 14px; }
+      .details p { margin: 0 0 16px; color: var(--muted); font-size: 12px; }
+      .details b { display: block; margin-top: 4px; color: var(--ink); font-size: 18px; }
+      .main { min-width: 0; }
+      .topbar { position: sticky; top: 0; z-index: 10; display: flex; justify-content: space-between; align-items: center; padding: 24px 32px; background: rgba(255,255,255,.84); border-bottom: 1px solid rgba(226,232,240,.75); backdrop-filter: blur(14px); }
+      h1 { margin: 0; font-size: 28px; letter-spacing: -.04em; }
+      .subtitle { margin: 5px 0 0; color: var(--muted); font-size: 14px; }
+      .admin { display: flex; align-items: center; gap: 12px; padding: 9px 12px; border: 1px solid var(--line); border-radius: 18px; background: white; }
+      .avatar { width: 34px; height: 34px; border-radius: 50%; background: #e2e8f0; display: grid; place-items: center; font-weight: 900; }
+      .content { padding: 28px 32px 48px; }
+      .cards { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; }
+      .card { background: white; border: 1px solid rgba(226,232,240,.9); border-radius: 24px; box-shadow: 0 10px 30px rgba(15, 23, 42, .06); }
+      .metric { padding: 24px; display: flex; gap: 18px; align-items: center; }
+      .metric-icon { width: 58px; height: 58px; border-radius: 999px; display: grid; place-items: center; color: white; font-size: 28px; background: linear-gradient(135deg, #2f7cff, #0646d8); }
+      .metric.green .metric-icon { background: linear-gradient(135deg, #35d96f, #159447); }
+      .metric.orange .metric-icon { background: linear-gradient(135deg, #ffbd35, #f97316); }
+      .metric.purple .metric-icon { background: linear-gradient(135deg, #7c3aed, #4338ca); }
+      .metric span { color: var(--muted); font-size: 14px; }
+      .metric b { display: block; margin-top: 3px; font-size: 28px; }
+      .grid { margin-top: 18px; display: grid; grid-template-columns: minmax(0, 1fr) 390px; gap: 18px; }
+      .section { padding: 22px; }
+      .section h2 { margin: 0 0 16px; font-size: 18px; }
+      .toolbar { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 18px; }
+      select, button, .button { border: 1px solid var(--line); border-radius: 14px; background: white; padding: 11px 14px; color: var(--ink); font-weight: 700; }
+      .button.primary { background: var(--blue); color: white; border-color: var(--blue); box-shadow: 0 18px 35px rgba(20, 86, 241, .22); }
+      .table-wrap { overflow: auto; border: 1px solid var(--line); border-radius: 18px; }
+      table { width: 100%; border-collapse: collapse; min-width: 1100px; font-size: 14px; }
+      th { text-align: left; background: #f8fafc; color: #475569; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; }
+      th, td { padding: 14px 16px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+      tr:last-child td { border-bottom: 0; }
+      .sticky { position: sticky; left: 0; background: white; z-index: 2; font-weight: 800; }
+      th.sticky { background: #f8fafc; }
+      .dot { width: 12px; height: 12px; display: inline-block; border-radius: 99px; }
+      .paid { background: var(--green); } .pending { background: var(--orange); } .missing { background: var(--red); }
+      .pill { display: inline-flex; align-items: center; gap: 6px; border-radius: 999px; padding: 7px 10px; font-weight: 800; font-size: 12px; }
+      .pill.paid { color: #15803d; background: #dcfce7; } .pill.pending { color: #c2410c; background: #ffedd5; } .pill.missing { color: #b91c1c; background: #fee2e2; }
+      .donut { width: 178px; height: 178px; border-radius: 50%; margin: 8px auto 22px; background: conic-gradient(var(--green) 0 57%, var(--blue) 57% 100%); display: grid; place-items: center; }
+      .donut::after { content: "56.7%\ACollected"; white-space: pre; text-align: center; width: 110px; height: 110px; border-radius: 50%; background: white; display: grid; place-items: center; font-weight: 900; line-height: 1.45; }
+      .summary-row { display: flex; justify-content: space-between; padding: 9px 0; color: var(--muted); font-size: 14px; }
+      .summary-row b { color: var(--ink); }
+      .progress { height: 11px; border-radius: 99px; overflow: hidden; background: #e2e8f0; margin-top: 12px; }
+      .progress > span { display: block; height: 100%; width: 56.7%; background: linear-gradient(90deg, var(--blue), var(--green)); }
+      .member-grid { margin-top: 18px; display: grid; grid-template-columns: 1fr 390px; gap: 18px; }
+      .members { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+      .member { padding: 18px; border: 1px solid var(--line); border-radius: 20px; }
+      .member-head { display: flex; justify-content: space-between; gap: 14px; }
+      .member h3 { margin: 0; font-size: 16px; } .member small { color: var(--muted); }
+      .upload-fab { position: fixed; right: 28px; bottom: 28px; width: 104px; height: 104px; border-radius: 50%; display: grid; place-items: center; text-align: center; background: var(--blue); color: white; font-weight: 900; box-shadow: 0 24px 50px rgba(20, 86, 241, .34); }
+      .notice { margin-bottom: 18px; padding: 14px 16px; border: 1px solid #bfdbfe; border-radius: 18px; background: #eff6ff; color: #1e3a8a; font-size: 14px; }
+      @media (max-width: 1180px) { .app { grid-template-columns: 1fr; } .sidebar { display: none; } .cards, .grid, .member-grid { grid-template-columns: 1fr; } .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+      @media (max-width: 720px) { .topbar, .content { padding: 20px; } .cards, .members { grid-template-columns: 1fr; } .admin { display: none; } h1 { font-size: 24px; } .upload-fab { width: 86px; height: 86px; font-size: 12px; } }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <aside class="sidebar">
+        <a class="brand" href="./index.html"><div class="logo">P</div><div><strong>PAYMENT TRACKER</strong><span>Weekly Contribution System</span></div></a>
+        <nav class="nav">
+          <a class="active" href="#dashboard">▦ Dashboard</a>
+          <a href="#upload">☁ Upload Payment</a>
+          <a href="#members">♡ My Contributions</a>
+          <a href="#schedule">□ Payment Schedule</a>
+          <a href="#receipts">▤ Receipts</a>
+          <a href="#summary">▥ Summary</a>
+        </nav>
+        <div class="details"><h3>Contribution Details</h3><p>Amount per week<b>₱250</b></p><p>Total Weeks<b>30</b></p><p>Duration<b>June 7 - Dec 27, 2026</b></p></div>
+      </aside>
+      <main class="main" id="dashboard">
+        <header class="topbar"><div><h1>Dashboard</h1><p class="subtitle">Overview of all member payments</p></div><div class="admin"><div class="avatar">A</div><div><b>Admin</b><div class="subtitle">Administrator</div></div></div></header>
+        <section class="content">
+          <div class="notice"><b>Static preview fallback.</b> If you previously saw the README page, the project was opened through a static file/README preview instead of the Next.js dev server. Run <code>npm install</code> and <code>npm run dev</code> for the production app.</div>
+          <div class="cards">
+            <div class="card metric"><div class="metric-icon">♙</div><div><span>Total Members</span><b>5</b><span>Active Members</span></div></div>
+            <div class="card metric green"><div class="metric-icon">✓</div><div><span>Paid This Week</span><b>3</b><span>60% of members</span></div></div>
+            <div class="card metric orange"><div class="metric-icon">◷</div><div><span>Pending This Week</span><b>2</b><span>40% of members</span></div></div>
+            <div class="card metric purple"><div class="metric-icon">₱</div><div><span>Total Collection</span><b>₱21,250</b><span>of ₱37,500</span></div></div>
+          </div>
+          <div class="grid" id="schedule">
+            <section class="card section"><div class="toolbar"><div><h2>Weekly Payment Tracker</h2><p class="subtitle">Green = Paid, Orange = Pending, Red = Missing</p></div><select><option>June 21, 2026 (Sunday)</option></select></div><div class="table-wrap"><table><thead><tr><th class="sticky">Member</th><th>Status</th><th>Jun 7</th><th>Jun 14</th><th>Jun 21</th><th>Jun 28</th><th>Jul 5</th><th>Jul 12</th><th>Jul 19</th><th>Jul 26</th><th>Aug 2</th><th>Aug 9</th></tr></thead><tbody><tr><td class="sticky">Juan Dela Cruz</td><td><span class="pill paid">● Paid</span></td><td><span class="dot paid"></span></td><td><span class="dot paid"></span></td><td><span class="dot paid"></span></td><td><span class="dot pending"></span></td><td><span class="dot pending"></span></td><td><span class="dot pending"></span></td><td><span class="dot pending"></span></td><td><span class="dot pending"></span></td><td><span class="dot pending"></span></td><td><span class="dot pending"></span></td></tr><tr><td class="sticky">Mark Anthony</td><td><span class="pill pending">● Pending</span></td><td><span class="dot paid"></span></td><td><span class="dot paid"></span></td><td><span class="dot missing"></span></td><td><span class="dot pending"></span></td><td><span class="dot pending"></span></td><td><span class="dot pending"></span></td><td><span class="dot pending"></span></td><td><span class="dot pending"></span></td><td><span class="dot pending"></span></td><td><span class="dot pending"></span></td></tr><tr><td class="sticky">Anne Villanueva</td><td><span class="pill missing">● Missing</span></td><td><span class="dot paid"></span></td><td><span class="dot missing"></span></td><td><span class="dot missing"></span></td><td><span class="dot pending"></span></td><td><span class="dot pending"></span></td><td><span class="dot pending"></span></td><td><span class="dot pending"></span></td><td><span class="dot pending"></span></td><td><span class="dot pending"></span></td><td><span class="dot pending"></span></td></tr><tr><td class="sticky">Paul Garcia</td><td><span class="pill paid">● Paid</span></td><td><span class="dot paid"></span></td><td><span class="dot paid"></span></td><td><span class="dot paid"></span></td><td><span class="dot pending"></span></td><td><span class="dot pending"></span></td><td><span class="dot pending"></span></td><td><span class="dot pending"></span></td><td><span class="dot pending"></span></td><td><span class="dot pending"></span></td><td><span class="dot pending"></span></td></tr><tr><td class="sticky">Lisa Reyes</td><td><span class="pill pending">● Pending</span></td><td><span class="dot paid"></span></td><td><span class="dot paid"></span></td><td><span class="dot missing"></span></td><td><span class="dot pending"></span></td><td><span class="dot pending"></span></td><td><span class="dot pending"></span></td><td><span class="dot pending"></span></td><td><span class="dot pending"></span></td><td><span class="dot pending"></span></td><td><span class="dot pending"></span></td></tr></tbody></table></div></section>
+            <aside class="card section" id="summary"><h2>Collection Summary</h2><div class="donut"></div><div class="summary-row"><span>Expected Total</span><b>₱37,500</b></div><div class="summary-row"><span>Collected</span><b>₱21,250</b></div><div class="summary-row"><span>Remaining</span><b>₱16,250</b></div><div class="progress"><span></span></div></aside>
+          </div>
+          <div class="member-grid" id="members"><section class="card section"><h2>Member Contribution Summary</h2><div class="members"><div class="member"><div class="member-head"><div><h3>Juan Dela Cruz</h3><small>19/30 paid weeks</small></div><b>₱4,750</b></div><div class="progress"><span style="width:63.3%"></span></div><p class="subtitle">Remaining: ₱2,750 · Next Due: June 28, 2026</p></div><div class="member"><div class="member-head"><div><h3>Mark Anthony</h3><small>17/30 paid weeks</small></div><b>₱4,250</b></div><div class="progress"><span style="width:56.7%"></span></div><p class="subtitle">Remaining: ₱3,250 · Next Due: June 21, 2026</p></div><div class="member"><div class="member-head"><div><h3>Anne Villanueva</h3><small>12/30 paid weeks</small></div><b>₱3,000</b></div><div class="progress"><span style="width:40%"></span></div><p class="subtitle">Remaining: ₱4,500 · Next Due: June 14, 2026</p></div><div class="member"><div class="member-head"><div><h3>Paul Garcia</h3><small>22/30 paid weeks</small></div><b>₱5,500</b></div><div class="progress"><span style="width:73.3%"></span></div><p class="subtitle">Remaining: ₱2,000 · Next Due: June 28, 2026</p></div></div></section><aside class="card section" id="receipts"><h2>Recent Payments</h2><div class="summary-row"><span>Juan Dela Cruz · Ref 1234 5678</span><b>₱250</b></div><div class="summary-row"><span>Paul Garcia · Ref 8642 9753</span><b>₱250</b></div><div class="summary-row"><span>Lisa Reyes · Ref 7231 9990</span><b>₱250</b></div><p style="margin-top:22px"><a class="button primary" id="upload" href="README.md">Open setup guide</a></p></aside></div>
+        </section>
+      </main>
+    </div>
+    <a class="upload-fab" href="README.md">Upload<br />Receipt</a>
+  </body>
+</html>
