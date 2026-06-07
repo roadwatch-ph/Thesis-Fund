@@ -89,6 +89,16 @@ The app is no longer just a static prototype when Google services are not config
 
 When a Google backend is configured, payment submission now fails loudly if the app cannot write to Google Sheets instead of silently saving the payment locally. If the form shows a Google backend error, redeploy the Apps Script web app as the latest version, confirm the web app URL is set in `GOOGLE_APPS_SCRIPT_WEB_APP_URL`, or share the target Sheet and Drive folder with the service account used by the direct Google API credentials.
 
+
+## GitHub Pages Apps Script troubleshooting
+
+The `index.html` build runs directly on GitHub Pages, so it cannot use Next.js API routes or `.env.local` values. It posts directly to the hard-coded Apps Script web app URL in `index.html`. If uploads show **“Hindi maabot ang Google Apps Script”**, update the URL if you created a new deployment, then redeploy the Apps Script web app as a **new version** with:
+
+- **Execute as:** Me
+- **Who has access:** Anyone
+
+After deployment, open the web app URL in a browser. A working deployment should return JSON dashboard data instead of a Google sign-in, authorization, or error page.
+
 ## Production build
 
 ```bash
