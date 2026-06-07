@@ -9,11 +9,12 @@ export async function POST(request: Request) {
     const formData = await request.formData();
     const memberName = String(formData.get("memberName") ?? "").trim();
     const dueDate = String(formData.get("dueDate") ?? "").trim();
+    const paymentMethod = String(formData.get("paymentMethod") ?? "").trim();
     const referenceNumber = String(formData.get("referenceNumber") ?? "").trim() || "Not provided";
     const amountPaid = Number(formData.get("amountPaid"));
     const receipt = formData.get("receipt");
 
-    if (!memberName || !dueDate || !amountPaid || !(receipt instanceof File)) {
+    if (!memberName || !dueDate || !paymentMethod || !amountPaid || !(receipt instanceof File)) {
       return NextResponse.json({ message: "Please complete all required payment fields." }, { status: 400 });
     }
 
@@ -28,7 +29,7 @@ export async function POST(request: Request) {
 
     if (process.env.DISABLE_APPS_SCRIPT_BACKEND !== "true") {
       try {
-        const result = await submitPaymentToAppsScript({ memberName, dueDate, referenceNumber, amountPaid, receipt });
+        const result = await submitPaymentToAppsScript({ memberName, dueDate, paymentMethod, referenceNumber, amountPaid, receipt });
         return NextResponse.json({ message: result.message || "Payment submitted successfully.", payment: result.payment });
       } catch (error) {
         console.error("Unable to submit payment to Google Apps Script. Saving to the local backend instead.", error);
@@ -41,6 +42,7 @@ export async function POST(request: Request) {
       timestamp: new Date().toISOString(),
       memberName,
       dueDate,
+      paymentMethod,
       amountPaid,
       referenceNumber,
       receiptLink,

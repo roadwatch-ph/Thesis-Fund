@@ -21,6 +21,7 @@ const CONFIG = {
     ['M004', 'Carmela Elaine Agrao', 100],
     ['M005', 'Darlene Grace Villanueva', 100],
   ],
+  paymentHeaders: ['Member', 'Due Date', 'Payment Method', 'Amount Paid', 'Reference Number', 'Receipt'],
   dueDates: [
     '2026-06-07', '2026-06-14', '2026-06-21', '2026-06-28', '2026-07-05', '2026-07-12',
     '2026-07-19', '2026-07-26', '2026-08-02', '2026-08-09', '2026-08-16', '2026-08-23',
@@ -54,16 +55,13 @@ function setupContributionTracker() {
   scheduleSheet.getRange(2, 1, CONFIG.dueDates.length, 1).setValues(CONFIG.dueDates.map(function (date) { return [date]; }));
   scheduleSheet.autoResizeColumn(1);
 
-  if (paymentsSheet.getLastRow() === 0) {
-    paymentsSheet.getRange(1, 1, 1, 8).setValues([[
-      'Timestamp', 'MemberName', 'DueDate', 'AmountPaid', 'ReferenceNumber', 'ReceiptLink', 'Status', 'Verified',
-    ]]);
-  } else {
-    paymentsSheet.getRange(1, 1, 1, 8).setValues([[
-      'Timestamp', 'MemberName', 'DueDate', 'AmountPaid', 'ReferenceNumber', 'ReceiptLink', 'Status', 'Verified',
-    ]]);
+  const existingPaymentRows = getExistingPaymentRows_(paymentsSheet);
+  paymentsSheet.clear();
+  paymentsSheet.getRange(1, 1, 1, CONFIG.paymentHeaders.length).setValues([CONFIG.paymentHeaders]);
+  if (existingPaymentRows.length > 0) {
+    paymentsSheet.getRange(2, 1, existingPaymentRows.length, CONFIG.paymentHeaders.length).setValues(existingPaymentRows);
   }
-  paymentsSheet.autoResizeColumns(1, 8);
+  paymentsSheet.autoResizeColumns(1, CONFIG.paymentHeaders.length);
 
   const rootFolder = getReceiptsRootFolder_();
   CONFIG.members.forEach(function (member) {
@@ -75,6 +73,49 @@ function setupContributionTracker() {
     spreadsheetId: spreadsheet.getId(),
     rootFolderUrl: rootFolder.getUrl(),
   };
+}
+
+
+function getExistingPaymentRows_(sheet) {
+  const lastRow = sheet.getLastRow();
+  if (lastRow < 2) return [];
+
+  const values = sheet.getDataRange().getValues();
+  const headers = values[0].map(function (header) { return normalizeHeader_(header); });
+  const hasNewHeaders = headers.indexOf('member') !== -1 && headers.indexOf('duedate') !== -1;
+  const hasOldHeaders = headers.indexOf('membername') !== -1 && headers.indexOf('receiptlink') !== -1;
+
+  return values.slice(1).map(function (row) {
+    if (hasNewHeaders) {
+      return [
+        row[headers.indexOf('member')],
+        formatDate_(row[headers.indexOf('duedate')]),
+        row[headers.indexOf('paymentmethod')],
+        row[headers.indexOf('amountpaid')],
+        row[headers.indexOf('referencenumber')],
+        row[headers.indexOf('receipt')],
+      ];
+    }
+
+    if (hasOldHeaders) {
+      return [
+        row[headers.indexOf('membername')],
+        formatDate_(row[headers.indexOf('duedate')]),
+        'GCash',
+        row[headers.indexOf('amountpaid')],
+        row[headers.indexOf('referencenumber')],
+        row[headers.indexOf('receiptlink')],
+      ];
+    }
+
+    return row.slice(0, CONFIG.paymentHeaders.length);
+  }).filter(function (row) {
+    return row[0] && row[1] && row[4];
+  });
+}
+
+function normalizeHeader_(value) {
+  return String(value || '').toLowerCase().replace(/[^a-z0-9]/g, '');
 }
 
 function doGet(event) {
@@ -116,14 +157,12 @@ function submitPayment_(payload) {
   const receiptLink = payload.receiptLink || saveReceipt_(payload);
   const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(CONFIG.sheets.payments);
   sheet.appendRow([
-    new Date(),
     payload.memberName,
     payload.dueDate,
+    payload.paymentMethod,
     Number(payload.amountPaid),
     String(payload.referenceNumber),
     receiptLink,
-    'Paid',
-    payload.verified === true ? 'Yes' : 'No',
   ]);
 
   return {
@@ -132,6 +171,7 @@ function submitPayment_(payload) {
       timestamp: new Date().toISOString(),
       memberName: payload.memberName,
       dueDate: payload.dueDate,
+      paymentMethod: payload.paymentMethod,
       amountPaid: Number(payload.amountPaid),
       referenceNumber: String(payload.referenceNumber),
       receiptLink: receiptLink,
@@ -163,12 +203,10 @@ function verifyPayment_(referenceNumber, dueDate, memberName) {
 
   for (var row = 1; row < values.length; row += 1) {
     const matchesReference = String(values[row][4]) === String(referenceNumber);
-    const matchesDate = !dueDate || formatDate_(values[row][2]) === String(dueDate);
-    const matchesMember = !memberName || String(values[row][1]) === String(memberName);
+    const matchesDate = !dueDate || formatDate_(values[row][1]) === String(dueDate);
+    const matchesMember = !memberName || String(values[row][0]) === String(memberName);
 
     if (matchesReference && matchesDate && matchesMember) {
-      sheet.getRange(row + 1, 7).setValue('Paid');
-      sheet.getRange(row + 1, 8).setValue('Yes');
       return { message: 'Payment verified.', row: row + 1 };
     }
   }
@@ -277,24 +315,24 @@ function getPayments_() {
   const lastRow = sheet.getLastRow();
   if (lastRow < 2) return [];
 
-  return sheet.getRange(2, 1, lastRow - 1, 8).getValues().filter(function (row) {
-    return row[1] && row[2] && row[4];
+  return sheet.getRange(2, 1, lastRow - 1, CONFIG.paymentHeaders.length).getValues().filter(function (row) {
+    return row[0] && row[1] && row[4];
   }).map(function (row) {
     return {
-      timestamp: row[0] instanceof Date ? row[0].toISOString() : String(row[0]),
-      memberName: String(row[1]),
-      dueDate: formatDate_(row[2]),
+      timestamp: formatDate_(row[1]),
+      memberName: String(row[0]),
+      dueDate: formatDate_(row[1]),
+      paymentMethod: String(row[2] || ''),
       amountPaid: Number(row[3]),
       referenceNumber: String(row[4]),
       receiptLink: String(row[5] || ''),
-      status: String(row[6] || 'Paid'),
-      verified: String(row[7] || 'No'),
+      status: 'Paid',
     };
   });
 }
 
 function validatePaymentPayload_(payload) {
-  const required = ['memberName', 'dueDate', 'amountPaid', 'referenceNumber'];
+  const required = ['memberName', 'dueDate', 'paymentMethod', 'amountPaid', 'referenceNumber'];
   required.forEach(function (field) {
     if (payload[field] === undefined || payload[field] === null || payload[field] === '') {
       throw new Error('Missing required field: ' + field);

@@ -24,20 +24,21 @@ export async function getDashboardData(): Promise<DashboardData> {
   const { sheets } = getGoogleClients();
   const response = await sheets.spreadsheets.values.batchGet({
     spreadsheetId,
-    ranges: [`${SHEET_NAMES.payments}!A2:G`],
+    ranges: [`${SHEET_NAMES.payments}!A2:F`],
   });
 
   const rows = response.data.valueRanges?.[0]?.values ?? [];
   const payments: Payment[] = rows
-    .filter((row) => row.length >= 7)
+    .filter((row) => row.length >= 6)
     .map((row) => ({
-      timestamp: String(row[0]),
-      memberName: String(row[1]),
-      dueDate: String(row[2]),
+      timestamp: String(row[1] || new Date().toISOString()),
+      memberName: String(row[0]),
+      dueDate: String(row[1]),
+      paymentMethod: String(row[2]),
       amountPaid: Number(row[3]) || 0,
       referenceNumber: String(row[4]),
       receiptLink: String(row[5]),
-      status: row[6] === "Paid" ? "Paid" : row[6] === "Missing" ? "Missing" : "Pending",
+      status: "Paid" as const,
     }));
 
   return buildDashboardData(payments);
