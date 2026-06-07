@@ -1,9 +1,9 @@
 export const MEMBERS = [
-  { id: "M001", name: "Jhon Lenard Dimaano", weeklyContribution: 250 },
-  { id: "M002", name: "Prince Johnel Abe", weeklyContribution: 250 },
-  { id: "M003", name: "Michael Orilla", weeklyContribution: 250 },
-  { id: "M004", name: "Carmela Elaine Agrao", weeklyContribution: 250 },
-  { id: "M005", name: "Darlene Grace Villanueva", weeklyContribution: 250 },
+  { id: "M001", name: "Jhon Lenard Dimaano", weeklyContribution: 100 },
+  { id: "M002", name: "Prince Johnel Abe", weeklyContribution: 100 },
+  { id: "M003", name: "Michael Orilla", weeklyContribution: 100 },
+  { id: "M004", name: "Carmela Elaine Agrao", weeklyContribution: 100 },
+  { id: "M005", name: "Darlene Grace Villanueva", weeklyContribution: 100 },
 ] as const;
 
 export const WEEKLY_DUE_DATES = [
@@ -16,7 +16,7 @@ export const WEEKLY_DUE_DATES = [
 
 export const CONTRIBUTION_START = "2026-06-07";
 export const CONTRIBUTION_END = "2026-12-27";
-export const DEFAULT_WEEKLY_CONTRIBUTION = 250;
+export const DEFAULT_WEEKLY_CONTRIBUTION = 100;
 
 export const SHEET_NAMES = {
   members: "Members",
