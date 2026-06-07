@@ -29,9 +29,9 @@ const uploadGuidelines = [
 ];
 
 const sampleProofs = [
-  { title: "Bank Transfer", accent: "bg-slate-50", label: "₱250.00", sublabel: "Bank receipt" },
-  { title: "GCash Payment", accent: "bg-blue-600", label: "PHP 250.00", sublabel: "GCash" },
-  { title: "Maya Receipt", accent: "bg-slate-950", label: "₱250.00", sublabel: "maya" },
+  { title: "Bank Transfer", accent: "bg-slate-50", label: "₱100.00", sublabel: "Bank receipt" },
+  { title: "GCash Payment", accent: "bg-blue-600", label: "PHP 100.00", sublabel: "GCash" },
+  { title: "Maya Receipt", accent: "bg-slate-950", label: "₱100.00", sublabel: "maya" },
 ];
 
 export function PaymentForm({ members, dueDates }: { members: Member[]; dueDates: string[] }) {
@@ -47,7 +47,7 @@ export function PaymentForm({ members, dueDates }: { members: Member[]; dueDates
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const selectedMemberDetails = useMemo(() => members.find((member) => member.name === selectedMember), [members, selectedMember]);
-  const amountPaid = String(selectedMemberDetails?.weeklyContribution ?? 250);
+  const amountPaid = String(selectedMemberDetails?.weeklyContribution ?? 100);
 
   function submitPayment(formData: FormData) {
     setMessage(null);
@@ -142,7 +142,7 @@ export function PaymentForm({ members, dueDates }: { members: Member[]; dueDates
               <span className="mt-4 text-sm text-slate-600"><span className="font-semibold text-brand-600">Click to upload</span> or drag and drop</span>
               <span className="mt-2 text-xs text-slate-500">PNG, JPG, JPEG, PDF up to 5MB</span>
               {receipt && <span className="mt-3 rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-brand-700">{receipt.name}</span>}
-              <input name="receipt" type="file" accept="image/png,image/jpeg,.pdf" className="sr-only" onChange={(event) => setReceipt(event.target.files?.[0] ?? null)} required />
+              <input name="receipt" type="file" accept="image/png,image/jpeg,.pdf" className="sr-only" ref={fileInputRef} onChange={(event) => setReceipt(event.target.files?.[0] ?? null)} required />
             </label>
           </div>
 
@@ -151,7 +151,7 @@ export function PaymentForm({ members, dueDates }: { members: Member[]; dueDates
         </div>
 
         <div className="flex flex-col-reverse gap-3 border-t border-slate-100 bg-white px-6 py-5 sm:flex-row sm:justify-end md:px-8">
-          <button type="button" onClick={() => setReceipt(null)} className="btn-secondary min-w-28">Cancel</button>
+          <button type="button" onClick={clearForm} className="btn-secondary min-w-28">Cancel</button>
           <button type="submit" disabled={isPending} className="btn-primary min-w-44">
             {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
             Submit Payment

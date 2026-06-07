@@ -19,11 +19,11 @@ A modern, production-ready Next.js application for tracking weekly GCash contrib
 
 | MemberID | MemberName | WeeklyContribution |
 | --- | --- | --- |
-| M001 | Jhon Lenard Dimaano | 250 |
-| M002 | Prince Johnel Abe | 250 |
-| M003 | Michael Orilla | 250 |
-| M004 | Carmela Elaine Agrao | 250 |
-| M005 | Darlene Grace Villanueva | 250 |
+| M001 | Jhon Lenard Dimaano | 100 |
+| M002 | Prince Johnel Abe | 100 |
+| M003 | Michael Orilla | 100 |
+| M004 | Carmela Elaine Agrao | 100 |
+| M005 | Darlene Grace Villanueva | 100 |
 
 ### Schedule
 
@@ -47,7 +47,7 @@ Payment Receipts
 └── Darlene Grace Villanueva
 ```
 
-Uploaded receipts are renamed as `MemberName_DueDate.ext`, for example `JhonLenardDimaano_2026-06-21.jpg`.
+Uploaded receipts are renamed as `MemberName_DueDate.ext`, for example `JhonLenardDimaano_2026-06-07.jpg`.
 
 ## Environment variables
 
