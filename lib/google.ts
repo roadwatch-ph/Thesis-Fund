@@ -1,11 +1,16 @@
 import { Readable } from "node:stream";
 import { google } from "googleapis";
-import { compactMemberName } from "@/lib/format";
+import { buildReceiptFileName } from "@/lib/format";
 import { MEMBERS, SHEET_NAMES, WEEKLY_DUE_DATES } from "@/lib/constants";
 import type { Payment } from "@/lib/types";
 
 const DRIVE_SCOPE = "https://www.googleapis.com/auth/drive";
 const SHEETS_SCOPE = "https://www.googleapis.com/auth/spreadsheets";
+const DEFAULT_DRIVE_ROOT_FOLDER_ID = "1JU78o8NGnt-YrBp_7iR7d3WIEbx2AceL";
+
+function getDriveRootFolderId() {
+  return process.env.GOOGLE_DRIVE_ROOT_FOLDER_ID?.trim() || DEFAULT_DRIVE_ROOT_FOLDER_ID;
+}
 
 function getAuth() {
   const clientEmail = process.env.GOOGLE_CLIENT_EMAIL;
@@ -62,10 +67,10 @@ export async function uploadReceiptToDrive(params: {
   file: File;
 }) {
   const { drive } = getGoogleClients();
-  const rootFolderId = process.env.GOOGLE_DRIVE_ROOT_FOLDER_ID ?? await ensureDriveFolder("Payment Receipts");
+  const rootFolderId = getDriveRootFolderId() || (await ensureDriveFolder("Payment Receipts"));
   const memberFolderId = await ensureDriveFolder(params.memberName, rootFolderId);
   const extension = params.file.name.split(".").pop() || "jpg";
-  const fileName = `${compactMemberName(params.memberName)}_${params.dueDate}.${extension}`;
+  const fileName = buildReceiptFileName(params.memberName, params.dueDate, extension);
   const arrayBuffer = await params.file.arrayBuffer();
   const buffer = Buffer.from(arrayBuffer);
 
@@ -118,6 +123,9 @@ export async function seedSpreadsheetStructure() {
   const spreadsheetId = process.env.GOOGLE_SHEETS_SPREADSHEET_ID;
   if (!spreadsheetId) throw new Error("Missing GOOGLE_SHEETS_SPREADSHEET_ID environment variable.");
   const { sheets } = getGoogleClients();
+  const rootFolderId = getDriveRootFolderId() || (await ensureDriveFolder("Payment Receipts"));
+
+  await Promise.all(MEMBERS.map((member) => ensureDriveFolder(member.name, rootFolderId)));
 
   const spreadsheet = await sheets.spreadsheets.get({ spreadsheetId });
   const existingSheets = new Set(spreadsheet.data.sheets?.map((sheet) => sheet.properties?.title).filter(Boolean));

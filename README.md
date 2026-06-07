@@ -8,7 +8,7 @@ A modern, production-ready Next.js application for tracking weekly GCash contrib
 - Weekly payment matrix for all 30 Sundays in the contribution period.
 - Per-member contribution summaries with progress, paid weeks, remaining balance, last payment, and next due date.
 - Simple payment submission form with receipt upload.
-- Google Drive integration for member-specific receipt folders.
+- Google Drive integration for member-specific receipt folders inside the shared Google Drive folder (`1JU78o8NGnt-YrBp_7iR7d3WIEbx2AceL`).
 - Google Sheets integration using `Members`, `Schedule`, and `Payments` sheets; the `Payments` sheet starts empty until members upload receipts.
 - Receipt viewer modal with Google Drive link and verification action.
 - Responsive Stripe/Notion-inspired interface with white surfaces, blue accents, rounded cards, and soft shadows.
@@ -39,7 +39,7 @@ A modern, production-ready Next.js application for tracking weekly GCash contrib
 ## Google Drive folder structure
 
 ```text
-Payment Receipts
+Google Drive folder: 1JU78o8NGnt-YrBp_7iR7d3WIEbx2AceL
 ├── Jhon Lenard Dimaano
 ├── Prince Johnel Abe
 ├── Michael Orilla
@@ -47,7 +47,7 @@ Payment Receipts
 └── Darlene Grace Villanueva
 ```
 
-Uploaded receipts are renamed as `MemberName_DueDate.ext`, for example `JhonLenardDimaano_2026-06-07.jpg`.
+Uploaded receipts are automatically stored inside the selected member's folder and renamed as `Member Name_Due Date.ext`, for example `Jhon Lenard Dimaano_2026-06-07.jpg`.
 
 ## Environment variables
 
@@ -59,7 +59,7 @@ GOOGLE_APPS_SCRIPT_WEB_APP_URL=https://script.google.com/macros/s/AKfycbxnaQnzv3
 GOOGLE_CLIENT_EMAIL=your-service-account@project.iam.gserviceaccount.com
 GOOGLE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
 GOOGLE_SHEETS_SPREADSHEET_ID=your-google-sheet-id
-GOOGLE_DRIVE_ROOT_FOLDER_ID=optional-existing-payment-receipts-folder-id
+GOOGLE_DRIVE_ROOT_FOLDER_ID=1JU78o8NGnt-YrBp_7iR7d3WIEbx2AceL
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
 
@@ -84,7 +84,7 @@ curl -X POST http://localhost:3000/api/verify
 
 ## Local fallback backend
 
-The app is no longer just a static prototype when Google services are unavailable. If the Google Apps Script request fails and direct Google API credentials are not configured, submitted receipts are saved under `public/uploads/receipts`, payment records are persisted in `.data/payments.json`, and admins can verify pending payments from the receipt modal on the dashboard. This makes the system runnable locally with only `npm run dev`.
+The app is no longer just a static prototype when Google services are unavailable. If the Google Apps Script request fails and direct Google API credentials are not configured, submitted receipts are saved under member-specific folders in `public/uploads/receipts`, payment records are persisted in `.data/payments.json`, and admins can verify pending payments from the receipt modal on the dashboard. This makes the system runnable locally with only `npm run dev`.
 
 ## Production build
 
