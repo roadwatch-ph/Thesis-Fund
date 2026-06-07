@@ -424,8 +424,29 @@ function normalizeReferenceNumber_(referenceNumber) {
 }
 
 function parsePayload_(event) {
-  if (!event || !event.postData || !event.postData.contents) return {};
-  return JSON.parse(event.postData.contents);
+  if (!event) return {};
+
+  if (event.postData && event.postData.contents) {
+    const contents = String(event.postData.contents || '');
+    const contentType = String(event.postData.type || '').toLowerCase();
+
+    if (contentType.indexOf('application/json') !== -1 || contents.charAt(0) === '{') {
+      return JSON.parse(contents);
+    }
+  }
+
+  if (event.parameter) {
+    const payload = {};
+    Object.keys(event.parameter).forEach(function (key) {
+      payload[key] = event.parameter[key];
+    });
+    if (payload.amountPaid !== undefined && payload.amountPaid !== '') {
+      payload.amountPaid = Number(payload.amountPaid);
+    }
+    return payload;
+  }
+
+  return {};
 }
 
 function ensureSheet_(spreadsheet, sheetName) {
