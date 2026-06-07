@@ -14,11 +14,11 @@ const CONFIG = {
     payments: 'Payments',
   },
   members: [
-    ['M001', 'Juan Dela Cruz', 250],
-    ['M002', 'Mark Anthony', 250],
-    ['M003', 'Anne Villanueva', 250],
-    ['M004', 'Paul Garcia', 250],
-    ['M005', 'Lisa Reyes', 250],
+    ['M001', 'Jhon Lenard Dimaano', 250],
+    ['M002', 'Prince Johnel Abe', 250],
+    ['M003', 'Michael Orilla', 250],
+    ['M004', 'Carmela Elaine Agrao', 250],
+    ['M005', 'Darlene Grace Villanueva', 250],
   ],
   dueDates: [
     '2026-06-07', '2026-06-14', '2026-06-21', '2026-06-28', '2026-07-05', '2026-07-12',
