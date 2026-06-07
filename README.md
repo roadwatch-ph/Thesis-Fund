@@ -51,10 +51,11 @@ Uploaded receipts are automatically stored inside the selected member's folder a
 
 ## Environment variables
 
-Copy `.env.example` to `.env.local` and set. The app is preconfigured to use the deployed Google Apps Script web app URL below, and you can override it with `GOOGLE_APPS_SCRIPT_WEB_APP_URL` if you deploy a new script. Set `DISABLE_APPS_SCRIPT_BACKEND=true` only if you want to use service-account credentials directly from Next.js instead.
+Create `.env.local` only when you want to connect the app to your own Google backend. By default, no shared/demo Google Apps Script URL is used, so a fresh local run starts with an empty `Payments` source, ₱0 collected, and no recent payments. Set `GOOGLE_APPS_SCRIPT_WEB_APP_URL` only after deploying your own Apps Script web app. Set `DISABLE_APPS_SCRIPT_BACKEND=true` if you want to skip Apps Script and use service-account credentials directly from Next.js instead.
 
 ```bash
-GOOGLE_APPS_SCRIPT_WEB_APP_URL=https://script.google.com/macros/s/AKfycbxnaQnzv3VgLqxrxaAo4strOu1EOiEumW643WMhaSIGEXNaYxNG73v7Cgk1upEK0bL5RA/exec
+# Optional Apps Script backend; use your own deployed web app URL only.
+GOOGLE_APPS_SCRIPT_WEB_APP_URL=https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec
 # Optional direct Google API fallback:
 GOOGLE_CLIENT_EMAIL=your-service-account@project.iam.gserviceaccount.com
 GOOGLE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"

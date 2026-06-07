@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { submitPaymentToAppsScript } from "@/lib/apps-script";
+import { hasAppsScriptWebAppUrl, submitPaymentToAppsScript } from "@/lib/apps-script";
 import { appendPaymentToSheet, uploadReceiptToDrive } from "@/lib/google";
 import { appendLocalPayment, saveLocalReceipt } from "@/lib/local-store";
 import type { Payment } from "@/lib/types";
@@ -27,7 +27,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: "Receipt file must be 5MB or smaller." }, { status: 400 });
     }
 
-    if (process.env.DISABLE_APPS_SCRIPT_BACKEND !== "true") {
+    if (process.env.DISABLE_APPS_SCRIPT_BACKEND !== "true" && hasAppsScriptWebAppUrl()) {
       try {
         const result = await submitPaymentToAppsScript({ memberName, dueDate, paymentMethod, referenceNumber, amountPaid, receipt });
         return NextResponse.json({ message: result.message || "Payment submitted successfully.", payment: result.payment });
