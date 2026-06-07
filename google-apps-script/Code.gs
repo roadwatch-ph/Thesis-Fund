@@ -120,16 +120,26 @@ function normalizeHeader_(value) {
 
 function doGet(event) {
   const action = event && event.parameter && event.parameter.action ? event.parameter.action : 'dashboard';
+  const callback = getJsonpCallback_(event);
 
   if (action === 'setup') {
-    return json_(setupContributionTracker());
+    return json_(setupContributionTracker(), null, callback);
   }
 
   if (action === 'receipts') {
-    return json_({ receipts: getPayments_().filter(function (payment) { return payment.receiptLink; }) });
+    return json_({ receipts: getPayments_().filter(function (payment) { return payment.receiptLink; }) }, null, callback);
   }
 
-  return json_(getDashboardData_());
+  if (action === 'verifyPayment') {
+    const params = event && event.parameter ? event.parameter : {};
+    try {
+      return json_(verifyPayment_(params.referenceNumber, params.dueDate, params.memberName), null, callback);
+    } catch (error) {
+      return json_({ verified: false, message: error.message }, null, callback);
+    }
+  }
+
+  return json_(getDashboardData_(), null, callback);
 }
 
 function doPost(event) {
@@ -409,9 +419,15 @@ function formatDate_(value) {
   return String(value).slice(0, 10);
 }
 
-function json_(payload, statusCode) {
-  const output = ContentService.createTextOutput(JSON.stringify(payload));
-  output.setMimeType(ContentService.MimeType.JSON);
+function getJsonpCallback_(event) {
+  const callback = event && event.parameter && event.parameter.callback ? String(event.parameter.callback) : '';
+  return /^[A-Za-z_$][0-9A-Za-z_$]*(\.[A-Za-z_$][0-9A-Za-z_$]*)*$/.test(callback) ? callback : '';
+}
+
+function json_(payload, statusCode, callback) {
+  const body = callback ? callback + '(' + JSON.stringify(payload) + ');' : JSON.stringify(payload);
+  const output = ContentService.createTextOutput(body);
+  output.setMimeType(callback ? ContentService.MimeType.JAVASCRIPT : ContentService.MimeType.JSON);
   if (statusCode && output.setStatusCode) output.setStatusCode(statusCode);
   return output;
 }
