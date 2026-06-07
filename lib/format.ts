@@ -19,3 +19,12 @@ export function formatShortDate(value: string) {
 export function compactMemberName(value: string) {
   return value.replace(/[^a-zA-Z0-9]/g, "");
 }
+
+export function sanitizeReceiptNamePart(value: string) {
+  return value.trim().replace(/[\\/]/g, "-").replace(/\s+/g, " ");
+}
+
+export function buildReceiptFileName(memberName: string, dueDate: string, extension: string) {
+  const cleanExtension = extension.toLowerCase().replace(/[^a-z0-9]/g, "") || "jpg";
+  return `${sanitizeReceiptNamePart(memberName)}_${dueDate}.${cleanExtension}`;
+}

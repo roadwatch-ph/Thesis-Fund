@@ -7,6 +7,7 @@
  */
 
 const CONFIG = {
+  rootFolderId: '1JU78o8NGnt-YrBp_7iR7d3WIEbx2AceL',
   rootFolderName: 'Payment Receipts',
   sheets: {
     members: 'Members',
@@ -64,7 +65,7 @@ function setupContributionTracker() {
   }
   paymentsSheet.autoResizeColumns(1, 8);
 
-  const rootFolder = ensureFolder_(CONFIG.rootFolderName);
+  const rootFolder = getReceiptsRootFolder_();
   CONFIG.members.forEach(function (member) {
     ensureFolder_(member[1], rootFolder);
   });
@@ -145,10 +146,10 @@ function saveReceipt_(payload) {
     throw new Error('Receipt upload requires fileBase64 and mimeType, or provide receiptLink.');
   }
 
-  const rootFolder = ensureFolder_(CONFIG.rootFolderName);
+  const rootFolder = getReceiptsRootFolder_();
   const memberFolder = ensureFolder_(payload.memberName, rootFolder);
   const extension = getExtension_(payload.fileName, payload.mimeType);
-  const safeFileName = compactName_(payload.memberName) + '_' + payload.dueDate + '.' + extension;
+  const safeFileName = buildReceiptFileName_(payload.memberName, payload.dueDate, extension);
   const bytes = Utilities.base64Decode(stripBase64Prefix_(payload.fileBase64));
   const blob = Utilities.newBlob(bytes, payload.mimeType, safeFileName);
   const file = memberFolder.createFile(blob);
@@ -325,6 +326,13 @@ function ensureFolder_(folderName, parentFolder) {
   return parentFolder ? parentFolder.createFolder(folderName) : DriveApp.createFolder(folderName);
 }
 
+function getReceiptsRootFolder_() {
+  if (CONFIG.rootFolderId) {
+    return DriveApp.getFolderById(CONFIG.rootFolderId);
+  }
+  return ensureFolder_(CONFIG.rootFolderName);
+}
+
 function getCurrentDueDate_(dueDates) {
   const today = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy-MM-dd');
   const upcoming = dueDates.filter(function (dueDate) { return dueDate >= today; });
@@ -348,8 +356,12 @@ function stripBase64Prefix_(value) {
   return String(value).replace(/^data:[^;]+;base64,/, '');
 }
 
-function compactName_(value) {
-  return String(value).replace(/[^a-zA-Z0-9]/g, '');
+function buildReceiptFileName_(memberName, dueDate, extension) {
+  return sanitizeDriveFileName_(memberName) + '_' + String(dueDate) + '.' + extension;
+}
+
+function sanitizeDriveFileName_(value) {
+  return String(value).trim().replace(/[\\/]/g, '-').replace(/\s+/g, ' ');
 }
 
 function formatDate_(value) {

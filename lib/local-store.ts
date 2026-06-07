@@ -1,6 +1,6 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { compactMemberName } from "@/lib/format";
+import { buildReceiptFileName, sanitizeReceiptNamePart } from "@/lib/format";
 import type { Payment, PaymentStatus } from "@/lib/types";
 
 const DATA_DIR = path.join(process.cwd(), ".data");
@@ -50,13 +50,15 @@ function safeExtension(file: File) {
 }
 
 export async function saveLocalReceipt(params: { memberName: string; dueDate: string; file: File }) {
-  await mkdir(RECEIPTS_DIR, { recursive: true });
+  const memberFolderName = sanitizeReceiptNamePart(params.memberName);
+  const memberReceiptsDir = path.join(RECEIPTS_DIR, memberFolderName);
+  await mkdir(memberReceiptsDir, { recursive: true });
   const extension = safeExtension(params.file);
-  const fileName = `${compactMemberName(params.memberName)}_${params.dueDate}_${Date.now()}.${extension}`;
-  const filePath = path.join(RECEIPTS_DIR, fileName);
+  const fileName = buildReceiptFileName(params.memberName, params.dueDate, extension);
+  const filePath = path.join(memberReceiptsDir, fileName);
   const buffer = Buffer.from(await params.file.arrayBuffer());
   await writeFile(filePath, buffer);
-  return `/uploads/receipts/${fileName}`;
+  return `/uploads/receipts/${encodeURIComponent(memberFolderName)}/${encodeURIComponent(fileName)}`;
 }
 
 export async function appendLocalPayment(payment: Payment) {
