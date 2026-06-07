@@ -103,17 +103,16 @@ export async function appendPaymentToSheet(payment: Payment) {
 
   await sheets.spreadsheets.values.append({
     spreadsheetId,
-    range: `${SHEET_NAMES.payments}!A:G`,
+    range: `${SHEET_NAMES.payments}!A:F`,
     valueInputOption: "USER_ENTERED",
     requestBody: {
       values: [[
-        payment.timestamp,
         payment.memberName,
         payment.dueDate,
+        payment.paymentMethod,
         payment.amountPaid,
         payment.referenceNumber,
         payment.receiptLink,
-        payment.status,
       ]],
     },
   });
@@ -151,8 +150,8 @@ export async function seedSpreadsheetStructure() {
           values: [["DueDate"], ...WEEKLY_DUE_DATES.map((date) => [date])],
         },
         {
-          range: `${SHEET_NAMES.payments}!A1:G1`,
-          values: [["Timestamp", "MemberName", "DueDate", "AmountPaid", "ReferenceNumber", "ReceiptLink", "Status"]],
+          range: `${SHEET_NAMES.payments}!A1:F1`,
+          values: [["Member", "Due Date", "Payment Method", "Amount Paid", "Reference Number", "Receipt"]],
         },
       ],
     },

@@ -56,6 +56,7 @@ function normalizePayment(payment: Payment): Payment {
     timestamp: String(payment.timestamp || new Date().toISOString()),
     memberName: String(payment.memberName || ""),
     dueDate: String(payment.dueDate || ""),
+    paymentMethod: String(payment.paymentMethod || ""),
     amountPaid: Number(payment.amountPaid) || 0,
     referenceNumber: String(payment.referenceNumber || ""),
     receiptLink: String(payment.receiptLink || ""),
@@ -75,6 +76,7 @@ export async function getAppsScriptDashboardData(): Promise<DashboardData> {
 export async function submitPaymentToAppsScript(params: {
   memberName: string;
   dueDate: string;
+  paymentMethod: string;
   referenceNumber: string;
   amountPaid: number;
   receipt: File;
@@ -84,6 +86,7 @@ export async function submitPaymentToAppsScript(params: {
     action: "submitPayment",
     memberName: params.memberName,
     dueDate: params.dueDate,
+    paymentMethod: params.paymentMethod,
     referenceNumber: params.referenceNumber,
     amountPaid: params.amountPaid,
     fileName: params.receipt.name,

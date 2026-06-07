@@ -9,7 +9,7 @@ A modern, production-ready Next.js application for tracking weekly GCash contrib
 - Per-member contribution summaries with progress, paid weeks, remaining balance, last payment, and next due date.
 - Simple payment submission form with receipt upload.
 - Google Drive integration for member-specific receipt folders inside the shared Google Drive folder (`1JU78o8NGnt-YrBp_7iR7d3WIEbx2AceL`).
-- Google Sheets integration using `Members`, `Schedule`, and `Payments` sheets; the `Payments` sheet starts empty until members upload receipts.
+- Google Sheets integration using `Members`, `Schedule`, and `Payments` sheets; the `Payments` sheet starts empty until members upload receipts, then Apps Script automatically writes Member, Due Date, Payment Method, Amount Paid, Reference Number, and Receipt columns.
 - Receipt viewer modal with Google Drive link and verification action.
 - Responsive Stripe/Notion-inspired interface with white surfaces, blue accents, rounded cards, and soft shadows.
 
@@ -33,8 +33,8 @@ A modern, production-ready Next.js application for tracking weekly GCash contrib
 
 ### Payments
 
-| Timestamp | MemberName | DueDate | AmountPaid | ReferenceNumber | ReceiptLink | Status |
-| --- | --- | --- | --- | --- | --- | --- |
+| Member | Due Date | Payment Method | Amount Paid | Reference Number | Receipt |
+| --- | --- | --- | --- | --- | --- |
 
 ## Google Drive folder structure
 

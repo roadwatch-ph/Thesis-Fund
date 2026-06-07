@@ -17,6 +17,7 @@ function normalizePayment(payment: Partial<Payment>): Payment {
     timestamp: String(payment.timestamp || new Date().toISOString()),
     memberName: String(payment.memberName || ""),
     dueDate: String(payment.dueDate || ""),
+    paymentMethod: String(payment.paymentMethod || ""),
     amountPaid: Number(payment.amountPaid) || 0,
     referenceNumber: String(payment.referenceNumber || "Not provided"),
     receiptLink: String(payment.receiptLink || ""),

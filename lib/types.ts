@@ -10,6 +10,7 @@ export type Payment = {
   timestamp: string;
   memberName: string;
   dueDate: string;
+  paymentMethod: string;
   amountPaid: number;
   referenceNumber: string;
   receiptLink: string;
