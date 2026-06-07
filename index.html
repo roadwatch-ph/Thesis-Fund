@@ -265,10 +265,19 @@
             iframe.remove();
           }
 
+          function submitForm() {
+            if (submitted) return;
+            submitted = true;
+            form.submit();
+          }
+
           iframe.name = frameName;
           iframe.hidden = true;
           iframe.onload = () => {
-            if (!submitted) return;
+            if (!submitted) {
+              submitForm();
+              return;
+            }
             cleanup();
             resolve();
           };
@@ -287,10 +296,8 @@
             form.appendChild(input);
           });
 
-          document.body.appendChild(iframe);
           document.body.appendChild(form);
-          submitted = true;
-          form.submit();
+          document.body.appendChild(iframe);
         });
       }
 
