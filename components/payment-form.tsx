@@ -60,7 +60,7 @@ export function PaymentForm({ members, dueDates }: { members: Member[]; dueDates
           setError(payload.message ?? "Payment submission failed.");
           return;
         }
-        setMessage("Payment submitted successfully. Your proof of payment is now recorded and ready for verification.");
+        setMessage(payload.message ?? "Payment submitted successfully. Your proof of payment is now recorded and ready for verification.");
         setReferenceNumber("");
         setNotes("");
         setReceipt(null);

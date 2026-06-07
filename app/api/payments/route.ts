@@ -4,6 +4,10 @@ import { appendPaymentToSheet, uploadReceiptToDrive } from "@/lib/google";
 import { appendLocalPayment, saveLocalReceipt } from "@/lib/local-store";
 import type { Payment } from "@/lib/types";
 
+function getErrorMessage(error: unknown) {
+  return error instanceof Error ? error.message : "Unknown Google backend error.";
+}
+
 export async function POST(request: Request) {
   try {
     const formData = await request.formData();
@@ -27,16 +31,29 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: "Receipt file must be 5MB or smaller." }, { status: 400 });
     }
 
-    if (process.env.DISABLE_APPS_SCRIPT_BACKEND !== "true" && hasAppsScriptWebAppUrl()) {
+    const hasAppsScriptBackend = process.env.DISABLE_APPS_SCRIPT_BACKEND !== "true" && hasAppsScriptWebAppUrl();
+    const hasGoogleCredentials = Boolean(process.env.GOOGLE_CLIENT_EMAIL && process.env.GOOGLE_PRIVATE_KEY && process.env.GOOGLE_SHEETS_SPREADSHEET_ID);
+    let googleBackendError: string | null = null;
+
+    if (hasAppsScriptBackend) {
       try {
         const result = await submitPaymentToAppsScript({ memberName, dueDate, paymentMethod, referenceNumber, amountPaid, receipt });
-        return NextResponse.json({ message: result.message || "Payment submitted successfully.", payment: result.payment });
+        return NextResponse.json({ message: result.message || "Payment saved to Google Sheets successfully.", payment: result.payment });
       } catch (error) {
-        console.error("Unable to submit payment to Google Apps Script. Saving to the local backend instead.", error);
+        googleBackendError = getErrorMessage(error);
+        console.error("Unable to submit payment to Google Apps Script.", error);
       }
     }
 
-    const hasGoogleCredentials = process.env.GOOGLE_CLIENT_EMAIL && process.env.GOOGLE_PRIVATE_KEY && process.env.GOOGLE_SHEETS_SPREADSHEET_ID;
+    if (hasAppsScriptBackend && !hasGoogleCredentials) {
+      return NextResponse.json(
+        {
+          message: `Payment was not saved to Google Sheets. Please check your Google Apps Script deployment. Error: ${googleBackendError ?? "Google Apps Script unavailable."}`,
+        },
+        { status: 502 },
+      );
+    }
+
     const receiptLink = hasGoogleCredentials ? await uploadReceiptToDrive({ memberName, dueDate, file: receipt }) : await saveLocalReceipt({ memberName, dueDate, file: receipt });
     const payment: Payment = {
       timestamp: new Date().toISOString(),
@@ -50,12 +67,26 @@ export async function POST(request: Request) {
     };
 
     if (hasGoogleCredentials) {
-      await appendPaymentToSheet(payment);
-    } else {
-      await appendLocalPayment(payment);
+      try {
+        await appendPaymentToSheet(payment);
+        return NextResponse.json({ message: "Payment saved to Google Sheets successfully.", payment });
+      } catch (error) {
+        googleBackendError = getErrorMessage(error);
+        console.error("Unable to append payment to Google Sheets.", error);
+      }
     }
 
-    return NextResponse.json({ message: "Payment submitted successfully.", payment });
+    if (hasAppsScriptBackend || hasGoogleCredentials) {
+      return NextResponse.json(
+        {
+          message: `Payment was not saved to Google Sheets. Please check your Google backend configuration. Error: ${googleBackendError ?? "Google backend unavailable."}`,
+        },
+        { status: 502 },
+      );
+    }
+
+    await appendLocalPayment(payment);
+    return NextResponse.json({ message: "Payment saved to the local backend. Configure Google Sheets to record it online.", payment });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unable to submit payment.";
     return NextResponse.json({ message }, { status: 500 });

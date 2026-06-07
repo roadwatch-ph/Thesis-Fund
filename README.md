@@ -85,7 +85,9 @@ curl -X POST http://localhost:3000/api/verify
 
 ## Local fallback backend
 
-The app is no longer just a static prototype when Google services are unavailable. If the Google Apps Script request fails and direct Google API credentials are not configured, submitted receipts are saved under member-specific folders in `public/uploads/receipts`, payment records are persisted in `.data/payments.json`, and admins can verify pending payments from the receipt modal on the dashboard. This makes the system runnable locally with only `npm run dev`.
+The app is no longer just a static prototype when Google services are not configured. If no Google Apps Script URL and no direct Google API credentials are present, submitted receipts are saved under member-specific folders in `public/uploads/receipts`, payment records are persisted in `.data/payments.json`, and admins can verify pending payments from the receipt modal on the dashboard. This makes the system runnable locally with only `npm run dev`.
+
+When a Google backend is configured, payment submission now fails loudly if the app cannot write to Google Sheets instead of silently saving the payment locally. If the form shows a Google backend error, redeploy the Apps Script web app as the latest version, confirm the web app URL is set in `GOOGLE_APPS_SCRIPT_WEB_APP_URL`, or share the target Sheet and Drive folder with the service account used by the direct Google API credentials.
 
 ## Production build
 
