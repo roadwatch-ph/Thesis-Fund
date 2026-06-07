@@ -92,7 +92,7 @@ export function DashboardClient({ data }: { data: DashboardData }) {
               {upcomingDates.map((date) => (
                 <div key={date} className="flex items-center justify-between gap-3">
                   <div className="flex items-center gap-3"><CalendarDays className="h-5 w-5 text-slate-500" /><div><p className="font-semibold">{formatDate(date)} (Sun)</p><p className="text-xs text-slate-500">Week {data.dueDates.indexOf(date) + 1}</p></div></div>
-                  <span className="rounded-full bg-orange-50 px-3 py-1 text-sm font-bold text-orange-600">₱250</span>
+                  <span className="rounded-full bg-orange-50 px-3 py-1 text-sm font-bold text-orange-600">₱100</span>
                 </div>
               ))}
             </div>
