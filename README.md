@@ -76,11 +76,15 @@ Open [http://localhost:3000](http://localhost:3000).
 
 ## Preparing Google Sheets
 
-After configuring the Apps Script URL (or direct Google API credentials), call this endpoint once to create the expected sheets, Drive folders, and seed only the member/schedule headers. Payment rows are not seeded, so the dashboard starts with ₱0 collected and no recent payments until uploads are submitted:
+After configuring the Apps Script URL (or direct Google API credentials), call this endpoint once to create the expected sheets, Drive folders, and seed only the member/schedule headers. Payment rows are not seeded, so the dashboard starts with ₱0 collected and no recent payments until uploads are submitted. If Google Apps Script or Google API credentials are unavailable, the same endpoint confirms the built-in local backend instead:
 
 ```bash
 curl -X POST http://localhost:3000/api/verify
 ```
+
+## Local fallback backend
+
+The app is no longer just a static prototype when Google services are unavailable. If the Google Apps Script request fails and direct Google API credentials are not configured, submitted receipts are saved under `public/uploads/receipts`, payment records are persisted in `.data/payments.json`, and admins can verify pending payments from the receipt modal on the dashboard. This makes the system runnable locally with only `npm run dev`.
 
 ## Production build
 

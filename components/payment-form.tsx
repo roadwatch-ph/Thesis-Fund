@@ -35,7 +35,7 @@ const sampleProofs = [
 ];
 
 export function PaymentForm({ members, dueDates }: { members: Member[]; dueDates: string[] }) {
-  const [selectedMember] = useState(members[0]?.name ?? "");
+  const [selectedMember, setSelectedMember] = useState(members[0]?.name ?? "");
   const [selectedDate, setSelectedDate] = useState(dueDates[2] ?? dueDates[0] ?? "");
   const [paymentMethod, setPaymentMethod] = useState("");
   const [referenceNumber, setReferenceNumber] = useState("");
@@ -59,7 +59,7 @@ export function PaymentForm({ members, dueDates }: { members: Member[]; dueDates
         setError(payload.message ?? "Payment submission failed.");
         return;
       }
-      setMessage("Payment submitted successfully. Your proof of payment is now recorded.");
+      setMessage("Payment submitted successfully. Your proof of payment is now recorded and ready for verification.");
       setReferenceNumber("");
       setNotes("");
       setReceipt(null);
@@ -86,10 +86,18 @@ export function PaymentForm({ members, dueDates }: { members: Member[]; dueDates
             <p className="mt-2 text-sm text-slate-500">Please fill in the details of your payment</p>
           </div>
 
-          <input type="hidden" name="memberName" value={selectedMember} />
           <input type="hidden" name="paymentMethod" value={paymentMethod} />
 
           <div className="mt-7 max-w-2xl space-y-5">
+            <label className="block">
+              <span className="text-sm font-bold text-slate-800">Member</span>
+              <select name="memberName" value={selectedMember} onChange={(event) => setSelectedMember(event.target.value)} className="input mt-2" required>
+                {members.map((member) => (
+                  <option key={member.id} value={member.name}>{member.name}</option>
+                ))}
+              </select>
+            </label>
+
             <label className="block">
               <span className="text-sm font-bold text-slate-800">Pay For</span>
               <select name="dueDate" value={selectedDate} onChange={(event) => setSelectedDate(event.target.value)} className="input mt-2" required>

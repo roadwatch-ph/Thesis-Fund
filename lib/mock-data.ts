@@ -8,7 +8,7 @@ export function buildDashboardData(payments: Payment[] = []): DashboardData {
   const dueDates = [...WEEKLY_DUE_DATES];
   const today = new Date().toISOString().slice(0, 10);
   const currentDueDate = dueDates.find((date) => date >= today) ?? dueDates[dueDates.length - 1];
-  const paymentMap = new Map(payments.map((payment) => [`${payment.memberName}:${payment.dueDate}`, payment]));
+  const paymentMap = new Map(payments.filter((payment) => payment.status === "Paid").map((payment) => [`${payment.memberName}:${payment.dueDate}`, payment]));
   const weeklyStatuses: DashboardData["weeklyStatuses"] = {};
 
   for (const member of members) {

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { submitPaymentToAppsScript } from "@/lib/apps-script";
 import { appendPaymentToSheet, uploadReceiptToDrive } from "@/lib/google";
+import { appendLocalPayment, saveLocalReceipt } from "@/lib/local-store";
 import type { Payment } from "@/lib/types";
 
 export async function POST(request: Request) {
@@ -16,12 +17,26 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: "Please complete all required payment fields." }, { status: 400 });
     }
 
-    if (process.env.DISABLE_APPS_SCRIPT_BACKEND !== "true") {
-      const result = await submitPaymentToAppsScript({ memberName, dueDate, referenceNumber, amountPaid, receipt });
-      return NextResponse.json({ message: result.message || "Payment submitted successfully.", payment: result.payment });
+    const allowedTypes = new Set(["image/png", "image/jpeg", "application/pdf"]);
+    if (!allowedTypes.has(receipt.type)) {
+      return NextResponse.json({ message: "Receipt must be a PNG, JPG, JPEG, or PDF file." }, { status: 400 });
     }
 
-    const receiptLink = await uploadReceiptToDrive({ memberName, dueDate, file: receipt });
+    if (receipt.size > 5 * 1024 * 1024) {
+      return NextResponse.json({ message: "Receipt file must be 5MB or smaller." }, { status: 400 });
+    }
+
+    if (process.env.DISABLE_APPS_SCRIPT_BACKEND !== "true") {
+      try {
+        const result = await submitPaymentToAppsScript({ memberName, dueDate, referenceNumber, amountPaid, receipt });
+        return NextResponse.json({ message: result.message || "Payment submitted successfully.", payment: result.payment });
+      } catch (error) {
+        console.error("Unable to submit payment to Google Apps Script. Saving to the local backend instead.", error);
+      }
+    }
+
+    const hasGoogleCredentials = process.env.GOOGLE_CLIENT_EMAIL && process.env.GOOGLE_PRIVATE_KEY && process.env.GOOGLE_SHEETS_SPREADSHEET_ID;
+    const receiptLink = hasGoogleCredentials ? await uploadReceiptToDrive({ memberName, dueDate, file: receipt }) : await saveLocalReceipt({ memberName, dueDate, file: receipt });
     const payment: Payment = {
       timestamp: new Date().toISOString(),
       memberName,
@@ -29,10 +44,14 @@ export async function POST(request: Request) {
       amountPaid,
       referenceNumber,
       receiptLink,
-      status: "Paid",
+      status: hasGoogleCredentials ? "Paid" : "Pending",
     };
 
-    await appendPaymentToSheet(payment);
+    if (hasGoogleCredentials) {
+      await appendPaymentToSheet(payment);
+    } else {
+      await appendLocalPayment(payment);
+    }
 
     return NextResponse.json({ message: "Payment submitted successfully.", payment });
   } catch (error) {
