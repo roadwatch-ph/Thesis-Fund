@@ -13,6 +13,9 @@ export type Payment = {
   paymentMethod: string;
   amountPaid: number;
   referenceNumber: string;
+  notes: string;
+  receiptFileName: string;
+  receiptFileId: string;
   receiptLink: string;
   status: PaymentStatus;
 };
