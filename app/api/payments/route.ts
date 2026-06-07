@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { submitPaymentToAppsScript } from "@/lib/apps-script";
 import { appendPaymentToSheet, uploadReceiptToDrive } from "@/lib/google";
 import type { Payment } from "@/lib/types";
 
@@ -13,6 +14,11 @@ export async function POST(request: Request) {
 
     if (!memberName || !dueDate || !referenceNumber || !amountPaid || !(receipt instanceof File)) {
       return NextResponse.json({ message: "Please complete all required payment fields." }, { status: 400 });
+    }
+
+    if (process.env.DISABLE_APPS_SCRIPT_BACKEND !== "true") {
+      const result = await submitPaymentToAppsScript({ memberName, dueDate, referenceNumber, amountPaid, receipt });
+      return NextResponse.json({ message: result.message || "Payment submitted successfully.", payment: result.payment });
     }
 
     const receiptLink = await uploadReceiptToDrive({ memberName, dueDate, file: receipt });

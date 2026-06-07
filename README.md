@@ -51,9 +51,11 @@ Uploaded receipts are renamed as `MemberName_DueDate.ext`, for example `JuanDela
 
 ## Environment variables
 
-Copy `.env.example` to `.env.local` and set:
+Copy `.env.example` to `.env.local` and set. The app is preconfigured to use the deployed Google Apps Script web app URL below, and you can override it with `GOOGLE_APPS_SCRIPT_WEB_APP_URL` if you deploy a new script. Set `DISABLE_APPS_SCRIPT_BACKEND=true` only if you want to use service-account credentials directly from Next.js instead.
 
 ```bash
+GOOGLE_APPS_SCRIPT_WEB_APP_URL=https://script.google.com/macros/s/AKfycbxnaQnzv3VgLqxrxaAo4strOu1EOiEumW643WMhaSIGEXNaYxNG73v7Cgk1upEK0bL5RA/exec
+# Optional direct Google API fallback:
 GOOGLE_CLIENT_EMAIL=your-service-account@project.iam.gserviceaccount.com
 GOOGLE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
 GOOGLE_SHEETS_SPREADSHEET_ID=your-google-sheet-id
@@ -61,7 +63,7 @@ GOOGLE_DRIVE_ROOT_FOLDER_ID=optional-existing-payment-receipts-folder-id
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
 
-Share the target Google Sheet and Drive folder with the service account email.
+When using the Apps Script backend, make sure the script is deployed as a web app with access to the target Google Sheet and Drive folders. When using the direct Google API fallback, share the target Google Sheet and Drive folder with the service account email.
 
 ## Setup
 
@@ -74,7 +76,7 @@ Open [http://localhost:3000](http://localhost:3000).
 
 ## Preparing Google Sheets
 
-After configuring credentials, call this endpoint once to create the expected sheets and seed the member/schedule headers:
+After configuring the Apps Script URL (or direct Google API credentials), call this endpoint once to create the expected sheets, Drive folders, and seed the member/schedule headers:
 
 ```bash
 curl -X POST http://localhost:3000/api/verify
