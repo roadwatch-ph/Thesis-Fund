@@ -192,7 +192,7 @@ function getDashboardData_() {
     weeklyStatuses[member.name] = {};
     dueDates.forEach(function (dueDate) {
       const key = member.name + ':' + dueDate;
-      weeklyStatuses[member.name][dueDate] = paymentKeys[key] ? 'Paid' : dueDate <= currentDueDate ? 'Missing' : 'Pending';
+      weeklyStatuses[member.name][dueDate] = paymentKeys[key] ? 'Paid' : dueDate < currentDueDate ? 'Missing' : 'Pending';
     });
   });
 
@@ -327,8 +327,8 @@ function ensureFolder_(folderName, parentFolder) {
 
 function getCurrentDueDate_(dueDates) {
   const today = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy-MM-dd');
-  const elapsed = dueDates.filter(function (dueDate) { return dueDate <= today; });
-  return elapsed.length ? elapsed[elapsed.length - 1] : dueDates[0];
+  const upcoming = dueDates.filter(function (dueDate) { return dueDate >= today; });
+  return upcoming.length ? upcoming[0] : dueDates[dueDates.length - 1];
 }
 
 function getExtension_(fileName, mimeType) {

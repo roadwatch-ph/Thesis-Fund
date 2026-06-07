@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useMemo, useRef, useState, useTransition } from "react";
 import { Clock3, CloudUpload, Copy, FileIcon, ImageIcon, Loader2, LockKeyhole } from "lucide-react";
 import { formatCurrency, formatDate } from "@/lib/format";
 import type { Member } from "@/lib/types";

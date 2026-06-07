@@ -1,4 +1,4 @@
-import { buildDashboardData, seededPayments } from "@/lib/mock-data";
+import { buildDashboardData } from "@/lib/mock-data";
 import type { DashboardData, Payment, PaymentStatus } from "@/lib/types";
 
 const DEFAULT_APPS_SCRIPT_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxnaQnzv3VgLqxrxaAo4strOu1EOiEumW643WMhaSIGEXNaYxNG73v7Cgk1upEK0bL5RA/exec";
@@ -68,7 +68,7 @@ export async function getAppsScriptDashboardData(): Promise<DashboardData> {
 
   return {
     ...dashboard,
-    payments: Array.isArray(dashboard.payments) ? dashboard.payments.map(normalizePayment) : seededPayments,
+    payments: Array.isArray(dashboard.payments) ? dashboard.payments.map(normalizePayment) : [],
   };
 }
 
@@ -117,5 +117,5 @@ export async function verifyAppsScriptPayment(params: Pick<Payment, "referenceNu
 }
 
 export function fallbackDashboardData() {
-  return buildDashboardData(seededPayments);
+  return buildDashboardData();
 }

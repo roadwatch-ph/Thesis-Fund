@@ -1,24 +1,13 @@
 import { MEMBERS, WEEKLY_DUE_DATES } from "@/lib/constants";
 import type { DashboardData, Member, Payment, PaymentStatus } from "@/lib/types";
 
-export const seededPayments: Payment[] = [
-  { timestamp: "2026-06-21T09:20:00.000Z", memberName: "Jhon Lenard Dimaano", dueDate: "2026-06-07", amountPaid: 250, referenceNumber: "1234 5678 9012 3456", receiptLink: "https://drive.google.com/file/d/sample-jhon-0607/view", status: "Paid" },
-  { timestamp: "2026-06-21T09:23:00.000Z", memberName: "Jhon Lenard Dimaano", dueDate: "2026-06-14", amountPaid: 250, referenceNumber: "9876 5432 1098 7654", receiptLink: "https://drive.google.com/file/d/sample-jhon-0614/view", status: "Paid" },
-  { timestamp: "2026-06-21T09:26:00.000Z", memberName: "Jhon Lenard Dimaano", dueDate: "2026-06-21", amountPaid: 250, referenceNumber: "2468 1357 9753 8642", receiptLink: "https://drive.google.com/file/d/sample-jhon-0621/view", status: "Paid" },
-  { timestamp: "2026-06-21T10:15:00.000Z", memberName: "Prince Johnel Abe", dueDate: "2026-06-07", amountPaid: 250, referenceNumber: "9844 2210 7741 3330", receiptLink: "https://drive.google.com/file/d/sample-prince-0607/view", status: "Paid" },
-  { timestamp: "2026-06-21T10:18:00.000Z", memberName: "Prince Johnel Abe", dueDate: "2026-06-14", amountPaid: 250, referenceNumber: "7856 0088 1122 4466", receiptLink: "https://drive.google.com/file/d/sample-prince-0614/view", status: "Paid" },
-  { timestamp: "2026-06-21T11:05:00.000Z", memberName: "Michael Orilla", dueDate: "2026-06-07", amountPaid: 250, referenceNumber: "3456 1000 5543 1111", receiptLink: "https://drive.google.com/file/d/sample-michael-0607/view", status: "Paid" },
-  { timestamp: "2026-06-21T11:40:00.000Z", memberName: "Carmela Elaine Agrao", dueDate: "2026-06-07", amountPaid: 250, referenceNumber: "6654 2341 9901 2221", receiptLink: "https://drive.google.com/file/d/sample-carmela-0607/view", status: "Paid" },
-  { timestamp: "2026-06-21T11:44:00.000Z", memberName: "Carmela Elaine Agrao", dueDate: "2026-06-14", amountPaid: 250, referenceNumber: "0012 3344 5566 7788", receiptLink: "https://drive.google.com/file/d/sample-carmela-0614/view", status: "Paid" },
-  { timestamp: "2026-06-21T11:50:00.000Z", memberName: "Carmela Elaine Agrao", dueDate: "2026-06-21", amountPaid: 250, referenceNumber: "8642 9753 1357 2468", receiptLink: "https://drive.google.com/file/d/sample-carmela-0621/view", status: "Paid" },
-  { timestamp: "2026-06-21T12:10:00.000Z", memberName: "Darlene Grace Villanueva", dueDate: "2026-06-07", amountPaid: 250, referenceNumber: "5100 2345 6666 0101", receiptLink: "https://drive.google.com/file/d/sample-darlene-0607/view", status: "Paid" },
-  { timestamp: "2026-06-21T12:13:00.000Z", memberName: "Darlene Grace Villanueva", dueDate: "2026-06-14", amountPaid: 250, referenceNumber: "7231 9990 1256 4312", receiptLink: "https://drive.google.com/file/d/sample-darlene-0614/view", status: "Paid" },
-];
+export const seededPayments: Payment[] = [];
 
-export function buildDashboardData(payments: Payment[] = seededPayments): DashboardData {
+export function buildDashboardData(payments: Payment[] = []): DashboardData {
   const members = MEMBERS.map((member) => ({ ...member })) satisfies Member[];
   const dueDates = [...WEEKLY_DUE_DATES];
-  const currentDueDate = "2026-06-21";
+  const today = new Date().toISOString().slice(0, 10);
+  const currentDueDate = dueDates.find((date) => date >= today) ?? dueDates[dueDates.length - 1];
   const paymentMap = new Map(payments.map((payment) => [`${payment.memberName}:${payment.dueDate}`, payment]));
   const weeklyStatuses: DashboardData["weeklyStatuses"] = {};
 
@@ -27,7 +16,7 @@ export function buildDashboardData(payments: Payment[] = seededPayments): Dashbo
     for (const dueDate of dueDates) {
       if (paymentMap.has(`${member.name}:${dueDate}`)) {
         weeklyStatuses[member.name][dueDate] = "Paid";
-      } else if (dueDate <= currentDueDate) {
+      } else if (dueDate < currentDueDate) {
         weeklyStatuses[member.name][dueDate] = "Missing";
       } else {
         weeklyStatuses[member.name][dueDate] = "Pending";

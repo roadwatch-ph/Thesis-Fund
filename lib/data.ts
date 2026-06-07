@@ -1,6 +1,6 @@
 import { MEMBERS, SHEET_NAMES, WEEKLY_DUE_DATES } from "@/lib/constants";
 import { getAppsScriptDashboardData } from "@/lib/apps-script";
-import { buildDashboardData, seededPayments } from "@/lib/mock-data";
+import { buildDashboardData } from "@/lib/mock-data";
 import type { DashboardData, Payment } from "@/lib/types";
 
 export async function getDashboardData(): Promise<DashboardData> {
@@ -16,7 +16,7 @@ export async function getDashboardData(): Promise<DashboardData> {
   const hasGoogleCredentials = process.env.GOOGLE_CLIENT_EMAIL && process.env.GOOGLE_PRIVATE_KEY && spreadsheetId;
 
   if (!hasGoogleCredentials) {
-    return buildDashboardData(seededPayments);
+    return buildDashboardData();
   }
 
   const { getGoogleClients } = await import("@/lib/google");
@@ -39,7 +39,7 @@ export async function getDashboardData(): Promise<DashboardData> {
       status: row[6] === "Paid" ? "Paid" : row[6] === "Missing" ? "Missing" : "Pending",
     }));
 
-  return buildDashboardData(payments.length ? payments : seededPayments);
+  return buildDashboardData(payments);
 }
 
 export function getStaticAppData() {
