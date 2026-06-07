@@ -1,9 +1,9 @@
 export const MEMBERS = [
-  { id: "M001", name: "Juan Dela Cruz", weeklyContribution: 250 },
-  { id: "M002", name: "Mark Anthony", weeklyContribution: 250 },
-  { id: "M003", name: "Anne Villanueva", weeklyContribution: 250 },
-  { id: "M004", name: "Paul Garcia", weeklyContribution: 250 },
-  { id: "M005", name: "Lisa Reyes", weeklyContribution: 250 },
+  { id: "M001", name: "Jhon Lenard Dimaano", weeklyContribution: 250 },
+  { id: "M002", name: "Prince Johnel Abe", weeklyContribution: 250 },
+  { id: "M003", name: "Michael Orilla", weeklyContribution: 250 },
+  { id: "M004", name: "Carmela Elaine Agrao", weeklyContribution: 250 },
+  { id: "M005", name: "Darlene Grace Villanueva", weeklyContribution: 250 },
 ] as const;
 
 export const WEEKLY_DUE_DATES = [
