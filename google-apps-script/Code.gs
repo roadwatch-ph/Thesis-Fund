@@ -21,7 +21,7 @@ const CONFIG = {
     ['M004', 'Carmela Elaine Agrao', 100],
     ['M005', 'Darlene Grace Villanueva', 100],
   ],
-  paymentHeaders: ['Member', 'Due Date', 'Payment Method', 'Amount Paid', 'Reference Number', 'Receipt'],
+  paymentHeaders: ['Timestamp', 'Member', 'Due Date', 'Payment Method', 'Amount Paid', 'Reference Number', 'Notes', 'Receipt File Name', 'Receipt Link', 'Drive File ID', 'Status'],
   dueDates: [
     '2026-06-07', '2026-06-14', '2026-06-21', '2026-06-28', '2026-07-05', '2026-07-12',
     '2026-07-19', '2026-07-26', '2026-08-02', '2026-08-09', '2026-08-16', '2026-08-23',
@@ -75,42 +75,18 @@ function setupContributionTracker() {
   };
 }
 
-
 function getExistingPaymentRows_(sheet) {
   const lastRow = sheet.getLastRow();
   if (lastRow < 2) return [];
 
   const values = sheet.getDataRange().getValues();
   const headers = values[0].map(function (header) { return normalizeHeader_(header); });
-  const hasNewHeaders = headers.indexOf('member') !== -1 && headers.indexOf('duedate') !== -1;
-  const hasOldHeaders = headers.indexOf('membername') !== -1 && headers.indexOf('receiptlink') !== -1;
 
   return values.slice(1).map(function (row) {
-    if (hasNewHeaders) {
-      return [
-        row[headers.indexOf('member')],
-        formatDate_(row[headers.indexOf('duedate')]),
-        row[headers.indexOf('paymentmethod')],
-        row[headers.indexOf('amountpaid')],
-        row[headers.indexOf('referencenumber')],
-        row[headers.indexOf('receipt')],
-      ];
-    }
-
-    if (hasOldHeaders) {
-      return [
-        row[headers.indexOf('membername')],
-        formatDate_(row[headers.indexOf('duedate')]),
-        'GCash',
-        row[headers.indexOf('amountpaid')],
-        row[headers.indexOf('referencenumber')],
-        row[headers.indexOf('receiptlink')],
-      ];
-    }
-
-    return row.slice(0, CONFIG.paymentHeaders.length);
+    const payment = paymentFromRow_(row, headers);
+    return paymentToRow_(payment);
   }).filter(function (row) {
-    return row[0] && row[1] && row[4];
+    return row[1] && row[2] && row[5];
   });
 }
 
@@ -164,29 +140,30 @@ function doPost(event) {
 function submitPayment_(payload) {
   validatePaymentPayload_(payload);
 
-  const receiptLink = payload.receiptLink || saveReceipt_(payload);
-  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(CONFIG.sheets.payments);
-  sheet.appendRow([
-    payload.memberName,
-    payload.dueDate,
-    payload.paymentMethod,
-    Number(payload.amountPaid),
-    String(payload.referenceNumber),
-    receiptLink,
-  ]);
+  const receipt = payload.receiptLink ? {
+    id: String(payload.receiptFileId || ''),
+    name: String(payload.receiptFileName || payload.fileName || ''),
+    link: String(payload.receiptLink),
+  } : saveReceipt_(payload);
+  const payment = {
+    timestamp: new Date().toISOString(),
+    memberName: payload.memberName,
+    dueDate: payload.dueDate,
+    paymentMethod: payload.paymentMethod,
+    amountPaid: Number(payload.amountPaid),
+    referenceNumber: String(payload.referenceNumber),
+    notes: String(payload.notes || ''),
+    receiptFileName: receipt.name,
+    receiptFileId: receipt.id,
+    receiptLink: receipt.link,
+    status: 'Paid',
+  };
+  const sheet = ensurePaymentSheet_();
+  sheet.appendRow(paymentToRow_(payment));
 
   return {
     message: 'Payment saved successfully.',
-    payment: {
-      timestamp: new Date().toISOString(),
-      memberName: payload.memberName,
-      dueDate: payload.dueDate,
-      paymentMethod: payload.paymentMethod,
-      amountPaid: Number(payload.amountPaid),
-      referenceNumber: String(payload.referenceNumber),
-      receiptLink: receiptLink,
-      status: 'Paid',
-    },
+    payment: payment,
     dashboard: getDashboardData_(),
   };
 }
@@ -204,17 +181,19 @@ function saveReceipt_(payload) {
   const blob = Utilities.newBlob(bytes, payload.mimeType, safeFileName);
   const file = memberFolder.createFile(blob);
   file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
-  return file.getUrl();
+  return { id: file.getId(), name: safeFileName, link: file.getUrl() };
 }
 
 function verifyPayment_(referenceNumber, dueDate, memberName) {
-  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(CONFIG.sheets.payments);
+  const sheet = ensurePaymentSheet_();
   const values = sheet.getDataRange().getValues();
+  const headers = values[0].map(function (header) { return normalizeHeader_(header); });
 
   for (var row = 1; row < values.length; row += 1) {
-    const matchesReference = String(values[row][4]) === String(referenceNumber);
-    const matchesDate = !dueDate || formatDate_(values[row][1]) === String(dueDate);
-    const matchesMember = !memberName || String(values[row][0]) === String(memberName);
+    const payment = paymentFromRow_(values[row], headers);
+    const matchesReference = String(payment.referenceNumber) === String(referenceNumber);
+    const matchesDate = !dueDate || payment.dueDate === String(dueDate);
+    const matchesMember = !memberName || payment.memberName === String(memberName);
 
     if (matchesReference && matchesDate && matchesMember) {
       return { message: 'Payment verified.', row: row + 1 };
@@ -321,24 +300,76 @@ function getDueDates_() {
 }
 
 function getPayments_() {
-  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(CONFIG.sheets.payments);
+  const sheet = ensurePaymentSheet_();
   const lastRow = sheet.getLastRow();
   if (lastRow < 2) return [];
 
-  return sheet.getRange(2, 1, lastRow - 1, CONFIG.paymentHeaders.length).getValues().filter(function (row) {
-    return row[0] && row[1] && row[4];
-  }).map(function (row) {
-    return {
-      timestamp: formatDate_(row[1]),
-      memberName: String(row[0]),
-      dueDate: formatDate_(row[1]),
-      paymentMethod: String(row[2] || ''),
-      amountPaid: Number(row[3]),
-      referenceNumber: String(row[4]),
-      receiptLink: String(row[5] || ''),
-      status: 'Paid',
-    };
+  const values = sheet.getDataRange().getValues();
+  const headers = values[0].map(function (header) { return normalizeHeader_(header); });
+  return values.slice(1).map(function (row) {
+    return paymentFromRow_(row, headers);
+  }).filter(function (payment) {
+    return payment.memberName && payment.dueDate && payment.referenceNumber;
   });
+}
+
+function paymentFromRow_(row, headers) {
+  const hasDetailedHeaders = headers.indexOf('timestamp') !== -1 && (headers.indexOf('receiptlink') !== -1 || headers.indexOf('receipt') !== -1);
+  if (hasDetailedHeaders) {
+    return {
+      timestamp: String(getCell_(row, headers, 'timestamp', 0) || new Date().toISOString()),
+      memberName: String(getCell_(row, headers, 'member', 1) || getCell_(row, headers, 'membername', 1) || ''),
+      dueDate: formatDate_(getCell_(row, headers, 'duedate', 2) || ''),
+      paymentMethod: String(getCell_(row, headers, 'paymentmethod', 3) || ''),
+      amountPaid: Number(getCell_(row, headers, 'amountpaid', 4) || 0),
+      referenceNumber: String(getCell_(row, headers, 'referencenumber', 5) || ''),
+      notes: String(getCell_(row, headers, 'notes', 6) || ''),
+      receiptFileName: String(getCell_(row, headers, 'receiptfilename', 7) || ''),
+      receiptLink: String(getCell_(row, headers, 'receiptlink', 8) || getCell_(row, headers, 'receipt', 8) || ''),
+      receiptFileId: String(getCell_(row, headers, 'drivefileid', 9) || getCell_(row, headers, 'receiptfileid', 9) || ''),
+      status: normalizePaymentStatus_(getCell_(row, headers, 'status', 10)),
+    };
+  }
+
+  return {
+    timestamp: formatDate_(row[1]),
+    memberName: String(row[0] || ''),
+    dueDate: formatDate_(row[1]),
+    paymentMethod: String(row[2] || ''),
+    amountPaid: Number(row[3] || 0),
+    referenceNumber: String(row[4] || ''),
+    notes: '',
+    receiptFileName: '',
+    receiptLink: String(row[5] || ''),
+    receiptFileId: '',
+    status: 'Paid',
+  };
+}
+
+function paymentToRow_(payment) {
+  return [
+    payment.timestamp,
+    payment.memberName,
+    payment.dueDate,
+    payment.paymentMethod,
+    Number(payment.amountPaid || 0),
+    String(payment.referenceNumber || ''),
+    String(payment.notes || ''),
+    String(payment.receiptFileName || ''),
+    String(payment.receiptLink || ''),
+    String(payment.receiptFileId || ''),
+    normalizePaymentStatus_(payment.status),
+  ];
+}
+
+function getCell_(row, headers, headerName, fallbackIndex) {
+  const index = headers.indexOf(headerName);
+  return row[index >= 0 ? index : fallbackIndex];
+}
+
+function normalizePaymentStatus_(status) {
+  const value = String(status || 'Paid');
+  return ['Paid', 'Pending', 'Missing'].indexOf(value) !== -1 ? value : 'Paid';
 }
 
 function validatePaymentPayload_(payload) {
@@ -357,6 +388,27 @@ function validatePaymentPayload_(payload) {
   if (CONFIG.dueDates.indexOf(payload.dueDate) === -1) {
     throw new Error('Invalid dueDate: ' + payload.dueDate);
   }
+}
+
+function ensurePaymentSheet_() {
+  const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+  const sheet = ensureSheet_(spreadsheet, CONFIG.sheets.payments);
+  const existingPaymentRows = getExistingPaymentRows_(sheet);
+  const firstRow = sheet.getLastRow() >= 1 ? sheet.getRange(1, 1, 1, CONFIG.paymentHeaders.length).getValues()[0] : [];
+  const currentHeaders = firstRow.map(function (header) { return normalizeHeader_(header); });
+  const desiredHeaders = CONFIG.paymentHeaders.map(function (header) { return normalizeHeader_(header); });
+  const headersAreCurrent = desiredHeaders.every(function (header, index) { return currentHeaders[index] === header; });
+
+  if (!headersAreCurrent) {
+    sheet.clear();
+    sheet.getRange(1, 1, 1, CONFIG.paymentHeaders.length).setValues([CONFIG.paymentHeaders]);
+    if (existingPaymentRows.length > 0) {
+      sheet.getRange(2, 1, existingPaymentRows.length, CONFIG.paymentHeaders.length).setValues(existingPaymentRows);
+    }
+    sheet.autoResizeColumns(1, CONFIG.paymentHeaders.length);
+  }
+
+  return sheet;
 }
 
 function parsePayload_(event) {

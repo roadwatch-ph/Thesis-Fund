@@ -20,6 +20,9 @@ function normalizePayment(payment: Partial<Payment>): Payment {
     paymentMethod: String(payment.paymentMethod || ""),
     amountPaid: Number(payment.amountPaid) || 0,
     referenceNumber: String(payment.referenceNumber || "Not provided"),
+    notes: String(payment.notes || ""),
+    receiptFileName: String(payment.receiptFileName || ""),
+    receiptFileId: String(payment.receiptFileId || ""),
     receiptLink: String(payment.receiptLink || ""),
     status: normalizeStatus(payment.status),
   };

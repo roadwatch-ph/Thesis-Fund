@@ -15,6 +15,7 @@ export async function POST(request: Request) {
     const dueDate = String(formData.get("dueDate") ?? "").trim();
     const paymentMethod = String(formData.get("paymentMethod") ?? "").trim();
     const referenceNumber = String(formData.get("referenceNumber") ?? "").trim() || "Not provided";
+    const notes = String(formData.get("notes") ?? "").trim();
     const amountPaid = Number(formData.get("amountPaid"));
     const receipt = formData.get("receipt");
 
@@ -37,7 +38,7 @@ export async function POST(request: Request) {
 
     if (hasAppsScriptBackend) {
       try {
-        const result = await submitPaymentToAppsScript({ memberName, dueDate, paymentMethod, referenceNumber, amountPaid, receipt });
+        const result = await submitPaymentToAppsScript({ memberName, dueDate, paymentMethod, referenceNumber, notes, amountPaid, receipt });
         return NextResponse.json({ message: result.message || "Payment saved to Google Sheets successfully.", payment: result.payment });
       } catch (error) {
         googleBackendError = getErrorMessage(error);
@@ -54,7 +55,8 @@ export async function POST(request: Request) {
       );
     }
 
-    const receiptLink = hasGoogleCredentials ? await uploadReceiptToDrive({ memberName, dueDate, file: receipt }) : await saveLocalReceipt({ memberName, dueDate, file: receipt });
+    const receiptUpload = hasGoogleCredentials ? await uploadReceiptToDrive({ memberName, dueDate, file: receipt }) : null;
+    const localReceiptLink = receiptUpload ? "" : await saveLocalReceipt({ memberName, dueDate, file: receipt });
     const payment: Payment = {
       timestamp: new Date().toISOString(),
       memberName,
@@ -62,7 +64,10 @@ export async function POST(request: Request) {
       paymentMethod,
       amountPaid,
       referenceNumber,
-      receiptLink,
+      notes,
+      receiptFileName: receiptUpload?.name || receipt.name,
+      receiptFileId: receiptUpload?.id || "",
+      receiptLink: receiptUpload?.webViewLink || localReceiptLink,
       status: hasGoogleCredentials ? "Paid" : "Pending",
     };
 

@@ -56,6 +56,9 @@ function normalizePayment(payment: Payment): Payment {
     paymentMethod: String(payment.paymentMethod || ""),
     amountPaid: Number(payment.amountPaid) || 0,
     referenceNumber: String(payment.referenceNumber || ""),
+    notes: String(payment.notes || ""),
+    receiptFileName: String(payment.receiptFileName || ""),
+    receiptFileId: String(payment.receiptFileId || ""),
     receiptLink: String(payment.receiptLink || ""),
     status: normalizePaymentStatus(payment.status),
   };
@@ -75,6 +78,7 @@ export async function submitPaymentToAppsScript(params: {
   dueDate: string;
   paymentMethod: string;
   referenceNumber: string;
+  notes: string;
   amountPaid: number;
   receipt: File;
 }) {
@@ -85,6 +89,7 @@ export async function submitPaymentToAppsScript(params: {
     dueDate: params.dueDate,
     paymentMethod: params.paymentMethod,
     referenceNumber: params.referenceNumber,
+    notes: params.notes,
     amountPaid: params.amountPaid,
     fileName: params.receipt.name,
     mimeType: params.receipt.type || "application/octet-stream",
