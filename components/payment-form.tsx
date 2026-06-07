@@ -53,17 +53,21 @@ export function PaymentForm({ members, dueDates }: { members: Member[]; dueDates
     setMessage(null);
     setError(null);
     startTransition(async () => {
-      const response = await fetch("/api/payments", { method: "POST", body: formData });
-      const payload = await response.json();
-      if (!response.ok) {
-        setError(payload.message ?? "Payment submission failed.");
-        return;
+      try {
+        const response = await fetch("/api/payments", { method: "POST", body: formData });
+        const payload = await response.json().catch(() => ({}));
+        if (!response.ok) {
+          setError(payload.message ?? "Payment submission failed.");
+          return;
+        }
+        setMessage("Payment submitted successfully. Your proof of payment is now recorded and ready for verification.");
+        setReferenceNumber("");
+        setNotes("");
+        setReceipt(null);
+        if (fileInputRef.current) fileInputRef.current.value = "";
+      } catch (error) {
+        setError(error instanceof Error ? error.message : "Payment submission failed.");
       }
-      setMessage("Payment submitted successfully. Your proof of payment is now recorded and ready for verification.");
-      setReferenceNumber("");
-      setNotes("");
-      setReceipt(null);
-      if (fileInputRef.current) fileInputRef.current.value = "";
     });
   }
 

@@ -25,16 +25,20 @@ export function DashboardClient({ data }: { data: DashboardData }) {
   const refreshDashboard = useCallback(() => {
     setRefreshError(null);
     startRefresh(async () => {
-      const response = await fetch("/api/dashboard", { cache: "no-store" });
-      const payload = await response.json().catch(() => ({}));
+      try {
+        const response = await fetch("/api/dashboard", { cache: "no-store" });
+        const payload = await response.json().catch(() => ({}));
 
-      if (!response.ok) {
-        setRefreshError(payload.message ?? "Unable to refresh dashboard data.");
-        return;
+        if (!response.ok) {
+          setRefreshError(payload.message ?? "Unable to refresh dashboard data.");
+          return;
+        }
+
+        setDashboardData(payload as DashboardData);
+        setLastUpdated(new Date());
+      } catch (error) {
+        setRefreshError(error instanceof Error ? error.message : "Unable to refresh dashboard data.");
       }
-
-      setDashboardData(payload as DashboardData);
-      setLastUpdated(new Date());
     });
   }, []);
 
@@ -261,24 +265,28 @@ function ReceiptModal({ payment, onClose, onVerified }: { payment: Payment; onCl
     setMessage(null);
     setError(null);
     startTransition(async () => {
-      const response = await fetch("/api/verify", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          referenceNumber: payment.referenceNumber,
-          dueDate: payment.dueDate,
-          memberName: payment.memberName,
-        }),
-      });
-      const payload = await response.json().catch(() => ({}));
+      try {
+        const response = await fetch("/api/verify", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            referenceNumber: payment.referenceNumber,
+            dueDate: payment.dueDate,
+            memberName: payment.memberName,
+          }),
+        });
+        const payload = await response.json().catch(() => ({}));
 
-      if (!response.ok) {
-        setError(payload.message ?? "Unable to verify payment.");
-        return;
+        if (!response.ok) {
+          setError(payload.message ?? "Unable to verify payment.");
+          return;
+        }
+
+        setMessage(payload.message ?? "Payment verified.");
+        onVerified();
+      } catch (error) {
+        setError(error instanceof Error ? error.message : "Unable to verify payment.");
       }
-
-      setMessage(payload.message ?? "Payment verified.");
-      onVerified();
     });
   }
 
