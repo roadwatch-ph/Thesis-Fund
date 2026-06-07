@@ -2,18 +2,6 @@
 
 A modern, production-ready Next.js application for tracking weekly GCash contributions for a five-member organization from **June 7, 2026** through **December 27, 2026**.
 
-
-## If you see this README instead of the dashboard
-
-You are opening a static repository/README preview, not the Next.js application server. The real application is in the `app/`, `components/`, and `lib/` folders and must be started with Next.js:
-
-```bash
-npm install
-npm run dev
-```
-
-Then open [http://localhost:3000](http://localhost:3000). A root `index.html` is included only as a static preview fallback for hosts that otherwise show this README page.
-
 ## Features
 
 - Admin dashboard with collection, paid, pending, and missing-payment statistics.
