@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
 import { Clock3, CloudUpload, Copy, FileIcon, ImageIcon, Loader2, LockKeyhole } from "lucide-react";
 import { formatCurrency, formatDate } from "@/lib/format";
 import type { Member } from "@/lib/types";
@@ -78,7 +78,7 @@ export function PaymentForm({ members, dueDates }: { members: Member[]; dueDates
   }
 
   return (
-    <div className="grid gap-7 xl:grid-cols-[minmax(0,1fr)_minmax(390px,520px)]">
+    <div className="grid gap-6 2xl:grid-cols-[minmax(0,1.35fr)_minmax(420px,0.85fr)]">
       <form action={submitPayment} className="card overflow-hidden">
         <div className="p-6 md:p-8">
           <div>
@@ -89,10 +89,10 @@ export function PaymentForm({ members, dueDates }: { members: Member[]; dueDates
           <input type="hidden" name="memberName" value={selectedMember} />
           <input type="hidden" name="paymentMethod" value={paymentMethod} />
 
-          <div className="mt-7 max-w-[420px] space-y-5">
+          <div className="mt-7 max-w-2xl space-y-5">
             <label className="block">
               <span className="text-sm font-bold text-slate-800">Pay For</span>
-              <select name="dueDate" value={selectedDate} onChange={(event) => setSelectedDate(event.target.value)} className="input mt-2 rounded-xl" required>
+              <select name="dueDate" value={selectedDate} onChange={(event) => setSelectedDate(event.target.value)} className="input mt-2" required>
                 {dueDates.map((date) => (
                   <option key={date} value={date}>{formatDate(date)} (Sunday)</option>
                 ))}
@@ -101,13 +101,13 @@ export function PaymentForm({ members, dueDates }: { members: Member[]; dueDates
 
             <label className="block">
               <span className="text-sm font-bold text-slate-800">Amount</span>
-              <input type="text" value={formatCurrency(Number(amountPaid))} className="input mt-2 rounded-xl bg-slate-100 text-slate-500" readOnly />
+              <input type="text" value={formatCurrency(Number(amountPaid))} className="input mt-2 bg-slate-100 text-slate-500" readOnly />
               <input type="hidden" name="amountPaid" value={amountPaid} />
             </label>
 
             <label className="block">
               <span className="text-sm font-bold text-slate-800">Payment Method</span>
-              <select value={paymentMethod} onChange={(event) => setPaymentMethod(event.target.value)} className="input mt-2 rounded-xl" required>
+              <select value={paymentMethod} onChange={(event) => setPaymentMethod(event.target.value)} className="input mt-2" required>
                 <option value="">Select payment method</option>
                 <option value="GCash">GCash</option>
                 <option value="Maya">Maya</option>
@@ -118,23 +118,23 @@ export function PaymentForm({ members, dueDates }: { members: Member[]; dueDates
 
             <label className="block">
               <span className="text-sm font-bold text-slate-800">Reference / Transaction ID (Optional)</span>
-              <input name="referenceNumber" value={referenceNumber} onChange={(event) => setReferenceNumber(event.target.value)} className="input mt-2 rounded-xl" placeholder="Enter reference or transaction ID" />
+              <input name="referenceNumber" value={referenceNumber} onChange={(event) => setReferenceNumber(event.target.value)} className="input mt-2" placeholder="Enter reference or transaction ID" />
             </label>
           </div>
 
           <label className="mt-5 block">
             <span className="text-sm font-bold text-slate-800">Notes (Optional)</span>
-            <textarea name="notes" value={notes} onChange={(event) => setNotes(event.target.value)} className="input mt-2 min-h-20 resize-y rounded-xl" placeholder="Add any notes about your payment" />
+            <textarea name="notes" value={notes} onChange={(event) => setNotes(event.target.value)} className="input mt-2 min-h-20 resize-y" placeholder="Add any notes about your payment" />
           </label>
 
           <div className="mt-5">
             <p className="text-sm font-bold text-slate-800">Upload Proof of Payment</p>
-            <label className="mt-2 flex min-h-36 cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-blue-200 bg-white px-6 py-8 text-center transition hover:border-brand-500 hover:bg-blue-50/50">
+            <label className="mt-2 flex min-h-36 cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-blue-200 bg-white px-6 py-8 text-center transition hover:border-brand-500 hover:bg-blue-50/50">
               <CloudUpload className="h-8 w-8 text-brand-600" />
               <span className="mt-4 text-sm text-slate-600"><span className="font-semibold text-brand-600">Click to upload</span> or drag and drop</span>
               <span className="mt-2 text-xs text-slate-500">PNG, JPG, JPEG, PDF up to 5MB</span>
-              {receipt && <span className="mt-3 max-w-full truncate rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-brand-700">{receipt.name}</span>}
-              <input ref={fileInputRef} name="receipt" type="file" accept="image/png,image/jpeg,.pdf" className="sr-only" onChange={(event) => setReceipt(event.target.files?.[0] ?? null)} required />
+              {receipt && <span className="mt-3 rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-brand-700">{receipt.name}</span>}
+              <input name="receipt" type="file" accept="image/png,image/jpeg,.pdf" className="sr-only" onChange={(event) => setReceipt(event.target.files?.[0] ?? null)} required />
             </label>
           </div>
 
@@ -143,20 +143,20 @@ export function PaymentForm({ members, dueDates }: { members: Member[]; dueDates
         </div>
 
         <div className="flex flex-col-reverse gap-3 border-t border-slate-100 bg-white px-6 py-5 sm:flex-row sm:justify-end md:px-8">
-          <button type="button" onClick={clearForm} className="btn-secondary min-w-28 rounded-xl">Cancel</button>
-          <button type="submit" disabled={isPending} className="btn-primary min-w-44 rounded-xl">
+          <button type="button" onClick={() => setReceipt(null)} className="btn-secondary min-w-28">Cancel</button>
+          <button type="submit" disabled={isPending} className="btn-primary min-w-44">
             {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
             Submit Payment
           </button>
         </div>
       </form>
 
-      <aside className="space-y-7">
+      <aside className="space-y-6">
         <div className="card p-6 md:p-7">
           <h3 className="text-xl font-bold tracking-tight">Upload Guidelines</h3>
           <p className="mt-2 text-sm text-slate-500">Please follow these guidelines when uploading your payment proof</p>
 
-          <div className="mt-8 space-y-7">
+          <div className="mt-8 space-y-6">
             {uploadGuidelines.map((item) => {
               const Icon = item.icon;
               return (
