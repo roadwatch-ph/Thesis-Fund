@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { CalendarDays, Check, ChevronRight, Clock3, CloudUpload, Eye, Users, WalletCards, XCircle } from "lucide-react";
 import { Pie, PieChart, Cell, ResponsiveContainer } from "recharts";
 import { SummaryCard } from "@/components/summary-card";
@@ -155,6 +156,36 @@ function ReceiptIcon() {
 }
 
 function ReceiptModal({ payment, onClose }: { payment: Payment; onClose: () => void }) {
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
+  const [message, setMessage] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  function verifyPayment() {
+    setMessage(null);
+    setError(null);
+    startTransition(async () => {
+      const response = await fetch("/api/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          referenceNumber: payment.referenceNumber,
+          dueDate: payment.dueDate,
+          memberName: payment.memberName,
+        }),
+      });
+      const payload = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        setError(payload.message ?? "Unable to verify payment.");
+        return;
+      }
+
+      setMessage(payload.message ?? "Payment verified.");
+      router.refresh();
+    });
+  }
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 p-4 backdrop-blur-sm">
       <div className="w-full max-w-3xl rounded-3xl bg-white p-6 shadow-soft">
@@ -165,7 +196,18 @@ function ReceiptModal({ payment, onClose }: { payment: Payment; onClose: () => v
         <div className="mt-6 flex min-h-[360px] items-center justify-center rounded-3xl border border-dashed border-slate-300 bg-slate-50 p-6 text-center">
           <div><Eye className="mx-auto h-12 w-12 text-slate-400" /><p className="mt-3 font-semibold">Preview depends on Google Drive sharing settings.</p><p className="mt-1 text-sm text-slate-500">Open the uploaded file in Drive to inspect the receipt and verify payment.</p></div>
         </div>
-        <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-end"><a href={payment.receiptLink} target="_blank" rel="noreferrer" className="btn-secondary">Open Google Drive File</a><button className="btn-primary"><Check className="h-4 w-4" />Verify Payment</button></div>
+        {(message || error) && (
+          <div className={`mt-5 rounded-2xl px-4 py-3 text-sm font-semibold ${message ? "bg-emerald-50 text-emerald-700" : "bg-red-50 text-red-700"}`}>
+            {message || error}
+          </div>
+        )}
+        <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-end">
+          <a href={payment.receiptLink} target="_blank" rel="noreferrer" className="btn-secondary">Open Receipt File</a>
+          <button onClick={verifyPayment} disabled={isPending || payment.status === "Paid"} className="btn-primary disabled:cursor-not-allowed disabled:opacity-60">
+            {isPending ? <Clock3 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
+            {payment.status === "Paid" ? "Verified" : "Verify Payment"}
+          </button>
+        </div>
       </div>
     </div>
   );
