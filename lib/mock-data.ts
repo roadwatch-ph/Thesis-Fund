@@ -8,14 +8,24 @@ export function buildDashboardData(payments: Payment[] = []): DashboardData {
   const dueDates = [...WEEKLY_DUE_DATES];
   const today = new Date().toISOString().slice(0, 10);
   const currentDueDate = dueDates.find((date) => date >= today) ?? dueDates[dueDates.length - 1];
-  const paymentMap = new Map(payments.filter((payment) => payment.status === "Paid").map((payment) => [`${payment.memberName}:${payment.dueDate}`, payment]));
+  const statusPriority: Record<PaymentStatus, number> = { Missing: 0, Pending: 1, Paid: 2 };
+  const paymentStatusMap = new Map<string, PaymentStatus>();
+
+  for (const payment of payments) {
+    const key = `${payment.memberName}:${payment.dueDate}`;
+    const existingStatus = paymentStatusMap.get(key);
+    if (!existingStatus || statusPriority[payment.status] > statusPriority[existingStatus]) {
+      paymentStatusMap.set(key, payment.status);
+    }
+  }
   const weeklyStatuses: DashboardData["weeklyStatuses"] = {};
 
   for (const member of members) {
     weeklyStatuses[member.name] = {};
     for (const dueDate of dueDates) {
-      if (paymentMap.has(`${member.name}:${dueDate}`)) {
-        weeklyStatuses[member.name][dueDate] = "Paid";
+      const submittedStatus = paymentStatusMap.get(`${member.name}:${dueDate}`);
+      if (submittedStatus) {
+        weeklyStatuses[member.name][dueDate] = submittedStatus;
       } else if (dueDate < currentDueDate) {
         weeklyStatuses[member.name][dueDate] = "Missing";
       } else {
