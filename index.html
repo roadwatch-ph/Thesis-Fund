@@ -81,8 +81,20 @@
       .member h3 { margin: 0; font-size: 16px; } .member small { color: var(--muted); }
       .upload-fab { position: fixed; right: 28px; bottom: 28px; width: 104px; height: 104px; border-radius: 50%; display: grid; place-items: center; text-align: center; background: var(--blue); color: white; font-weight: 900; box-shadow: 0 24px 50px rgba(20, 86, 241, .34); }
       .notice { margin-bottom: 18px; padding: 14px 16px; border: 1px solid #bfdbfe; border-radius: 18px; background: #eff6ff; color: #1e3a8a; font-size: 14px; }
-      @media (max-width: 1180px) { .app { grid-template-columns: 1fr; } .sidebar { display: none; } .cards, .grid, .member-grid { grid-template-columns: 1fr; } .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-      @media (max-width: 720px) { .topbar, .content { padding: 20px; } .cards, .members { grid-template-columns: 1fr; } .admin { display: none; } h1 { font-size: 24px; } .upload-fab { width: 86px; height: 86px; font-size: 12px; } }
+      .page[hidden] { display: none; }
+      .upload-layout { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 18px; align-items: start; }
+      .form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+      label span { display: block; margin-bottom: 8px; font-size: 13px; font-weight: 800; color: #1e293b; }
+      input, textarea, select { width: 100%; border: 1px solid var(--line); border-radius: 16px; background: white; padding: 12px 14px; color: var(--ink); font: inherit; }
+      textarea { min-height: 92px; resize: vertical; }
+      .upload-drop { margin-top: 16px; display: grid; place-items: center; min-height: 158px; border: 2px dashed #bfdbfe; border-radius: 22px; background: #f8fbff; text-align: center; color: var(--muted); }
+      .upload-drop strong { color: var(--blue); }
+      .form-actions { margin-top: 22px; display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid var(--line); padding-top: 18px; }
+      .guideline { display: flex; gap: 14px; align-items: flex-start; padding: 14px 0; border-bottom: 1px solid #f1f5f9; }
+      .guideline:last-child { border-bottom: 0; }
+      .guideline-icon { width: 42px; height: 42px; flex: 0 0 auto; display: grid; place-items: center; border-radius: 50%; background: #eff6ff; color: var(--blue); font-weight: 900; }
+      @media (max-width: 1180px) { .app { grid-template-columns: 1fr; } .sidebar { display: none; } .cards, .grid, .member-grid, .upload-layout { grid-template-columns: 1fr; } .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+      @media (max-width: 720px) { .topbar, .content { padding: 20px; } .cards, .members, .form-grid { grid-template-columns: 1fr; } .admin { display: none; } h1 { font-size: 24px; } .upload-fab { width: 86px; height: 86px; font-size: 12px; } .form-actions { flex-direction: column-reverse; } }
     </style>
   </head>
   <body>
@@ -90,18 +102,18 @@
       <aside class="sidebar">
         <a class="brand" href="./index.html"><div class="logo">P</div><div><strong>PAYMENT TRACKER</strong><span>Weekly Contribution System</span></div></a>
         <nav class="nav">
-          <a class="active" href="#dashboard">▦ Dashboard</a>
-          <a href="#upload">☁ Upload Payment</a>
-          <a href="#members">♡ My Contributions</a>
-          <a href="#schedule">□ Payment Schedule</a>
-          <a href="#receipts">▤ Receipts</a>
-          <a href="#summary">▥ Summary</a>
+          <a class="active" href="#dashboard" data-page-link="dashboard">▦ Dashboard</a>
+          <a href="#upload-payment" data-page-link="upload-payment">☁ Upload Payment</a>
+          <a href="#members" data-page-link="dashboard">♡ My Contributions</a>
+          <a href="#schedule" data-page-link="dashboard">□ Payment Schedule</a>
+          <a href="#receipts" data-page-link="dashboard">▤ Receipts</a>
+          <a href="#summary" data-page-link="dashboard">▥ Summary</a>
         </nav>
         <div class="details"><h3>Contribution Details</h3><p>Amount per week<b>₱250</b></p><p>Total Weeks<b>30</b></p><p>Duration<b>June 7 - Dec 27, 2026</b></p></div>
       </aside>
       <main class="main" id="dashboard">
-        <header class="topbar"><div><h1>Dashboard</h1><p class="subtitle">Overview of all member payments</p></div><div class="admin"><div class="avatar">A</div><div><b>Admin</b><div class="subtitle">Administrator</div></div></div></header>
-        <section class="content">
+        <header class="topbar"><div><h1 id="page-title">Dashboard</h1><p class="subtitle" id="page-subtitle">Overview of all member payments</p></div><div class="admin"><div class="avatar">A</div><div><b>Admin</b><div class="subtitle">Administrator</div></div></div></header>
+        <section class="content page" id="dashboard-page">
           <div class="notice"><b>Static preview fallback.</b> If you previously saw the README page, the project was opened through a static file/README preview instead of the Next.js dev server. Run <code>npm install</code> and <code>npm run dev</code> for the production app.</div>
           <div class="cards">
             <div class="card metric"><div class="metric-icon">♙</div><div><span>Total Members</span><b>5</b><span>Active Members</span></div></div>
@@ -113,10 +125,71 @@
             <section class="card section"><div class="toolbar"><div><h2>Weekly Payment Tracker</h2><p class="subtitle">Green = Paid, Orange = Pending, Red = Missing</p></div><select><option>June 21, 2026 (Sunday)</option></select></div><div class="table-wrap"><table><thead><tr><th class="sticky">Member</th><th>Status</th><th>Jun 7</th><th>Jun 14</th><th>Jun 21</th><th>Jun 28</th><th>Jul 5</th><th>Jul 12</th><th>Jul 19</th><th>Jul 26</th><th>Aug 2</th><th>Aug 9</th></tr></thead><tbody><tr><td class="sticky">Jhon Lenard Dimaano</td><td><span class="pill paid">● Paid</span></td><td><span class="dot paid"></span></td><td><span class="dot paid"></span></td><td><span class="dot paid"></span></td><td><span class="dot pending"></span></td><td><span class="dot pending"></span></td><td><span class="dot pending"></span></td><td><span class="dot pending"></span></td><td><span class="dot pending"></span></td><td><span class="dot pending"></span></td><td><span class="dot pending"></span></td></tr><tr><td class="sticky">Prince Johnel Abe</td><td><span class="pill pending">● Pending</span></td><td><span class="dot paid"></span></td><td><span class="dot paid"></span></td><td><span class="dot missing"></span></td><td><span class="dot pending"></span></td><td><span class="dot pending"></span></td><td><span class="dot pending"></span></td><td><span class="dot pending"></span></td><td><span class="dot pending"></span></td><td><span class="dot pending"></span></td><td><span class="dot pending"></span></td></tr><tr><td class="sticky">Michael Orilla</td><td><span class="pill missing">● Missing</span></td><td><span class="dot paid"></span></td><td><span class="dot missing"></span></td><td><span class="dot missing"></span></td><td><span class="dot pending"></span></td><td><span class="dot pending"></span></td><td><span class="dot pending"></span></td><td><span class="dot pending"></span></td><td><span class="dot pending"></span></td><td><span class="dot pending"></span></td><td><span class="dot pending"></span></td></tr><tr><td class="sticky">Carmela Elaine Agrao</td><td><span class="pill paid">● Paid</span></td><td><span class="dot paid"></span></td><td><span class="dot paid"></span></td><td><span class="dot paid"></span></td><td><span class="dot pending"></span></td><td><span class="dot pending"></span></td><td><span class="dot pending"></span></td><td><span class="dot pending"></span></td><td><span class="dot pending"></span></td><td><span class="dot pending"></span></td><td><span class="dot pending"></span></td></tr><tr><td class="sticky">Darlene Grace Villanueva</td><td><span class="pill pending">● Pending</span></td><td><span class="dot paid"></span></td><td><span class="dot paid"></span></td><td><span class="dot missing"></span></td><td><span class="dot pending"></span></td><td><span class="dot pending"></span></td><td><span class="dot pending"></span></td><td><span class="dot pending"></span></td><td><span class="dot pending"></span></td><td><span class="dot pending"></span></td><td><span class="dot pending"></span></td></tr></tbody></table></div></section>
             <aside class="card section" id="summary"><h2>Collection Summary</h2><div class="donut"></div><div class="summary-row"><span>Expected Total</span><b>₱37,500</b></div><div class="summary-row"><span>Collected</span><b>₱21,250</b></div><div class="summary-row"><span>Remaining</span><b>₱16,250</b></div><div class="progress"><span></span></div></aside>
           </div>
-          <div class="member-grid" id="members"><section class="card section"><h2>Member Contribution Summary</h2><div class="members"><div class="member"><div class="member-head"><div><h3>Jhon Lenard Dimaano</h3><small>19/30 paid weeks</small></div><b>₱4,750</b></div><div class="progress"><span style="width:63.3%"></span></div><p class="subtitle">Remaining: ₱2,750 · Next Due: June 28, 2026</p></div><div class="member"><div class="member-head"><div><h3>Prince Johnel Abe</h3><small>17/30 paid weeks</small></div><b>₱4,250</b></div><div class="progress"><span style="width:56.7%"></span></div><p class="subtitle">Remaining: ₱3,250 · Next Due: June 21, 2026</p></div><div class="member"><div class="member-head"><div><h3>Michael Orilla</h3><small>12/30 paid weeks</small></div><b>₱3,000</b></div><div class="progress"><span style="width:40%"></span></div><p class="subtitle">Remaining: ₱4,500 · Next Due: June 14, 2026</p></div><div class="member"><div class="member-head"><div><h3>Carmela Elaine Agrao</h3><small>22/30 paid weeks</small></div><b>₱5,500</b></div><div class="progress"><span style="width:73.3%"></span></div><p class="subtitle">Remaining: ₱2,000 · Next Due: June 28, 2026</p></div></div></section><aside class="card section" id="receipts"><h2>Recent Payments</h2><div class="summary-row"><span>Jhon Lenard Dimaano · Ref 1234 5678</span><b>₱250</b></div><div class="summary-row"><span>Carmela Elaine Agrao · Ref 8642 9753</span><b>₱250</b></div><div class="summary-row"><span>Darlene Grace Villanueva · Ref 7231 9990</span><b>₱250</b></div><p style="margin-top:22px"><a class="button primary" id="upload" href="README.md">Open setup guide</a></p></aside></div>
+          <div class="member-grid" id="members"><section class="card section"><h2>Member Contribution Summary</h2><div class="members"><div class="member"><div class="member-head"><div><h3>Jhon Lenard Dimaano</h3><small>19/30 paid weeks</small></div><b>₱4,750</b></div><div class="progress"><span style="width:63.3%"></span></div><p class="subtitle">Remaining: ₱2,750 · Next Due: June 28, 2026</p></div><div class="member"><div class="member-head"><div><h3>Prince Johnel Abe</h3><small>17/30 paid weeks</small></div><b>₱4,250</b></div><div class="progress"><span style="width:56.7%"></span></div><p class="subtitle">Remaining: ₱3,250 · Next Due: June 21, 2026</p></div><div class="member"><div class="member-head"><div><h3>Michael Orilla</h3><small>12/30 paid weeks</small></div><b>₱3,000</b></div><div class="progress"><span style="width:40%"></span></div><p class="subtitle">Remaining: ₱4,500 · Next Due: June 14, 2026</p></div><div class="member"><div class="member-head"><div><h3>Carmela Elaine Agrao</h3><small>22/30 paid weeks</small></div><b>₱5,500</b></div><div class="progress"><span style="width:73.3%"></span></div><p class="subtitle">Remaining: ₱2,000 · Next Due: June 28, 2026</p></div></div></section><aside class="card section" id="receipts"><h2>Recent Payments</h2><div class="summary-row"><span>Jhon Lenard Dimaano · Ref 1234 5678</span><b>₱250</b></div><div class="summary-row"><span>Carmela Elaine Agrao · Ref 8642 9753</span><b>₱250</b></div><div class="summary-row"><span>Darlene Grace Villanueva · Ref 7231 9990</span><b>₱250</b></div><p style="margin-top:22px"><a class="button primary" href="#upload-payment">Upload Payment</a></p></aside></div>
+        </section>
+        <section class="content page" id="upload-payment-page" hidden>
+          <div class="upload-layout">
+            <form class="card section" id="static-payment-form">
+              <h2>Payment Information</h2>
+              <p class="subtitle">Fill out your payment details and attach a clear proof of payment.</p>
+              <div class="form-grid" style="margin-top:22px">
+                <label><span>Member Name</span><select required><option value="">Select member</option><option>Jhon Lenard Dimaano</option><option>Prince Johnel Abe</option><option>Michael Orilla</option><option>Carmela Elaine Agrao</option><option>Darlene Grace Villanueva</option></select></label>
+                <label><span>Due Date</span><select required><option>June 21, 2026 (Sunday)</option><option>June 28, 2026 (Sunday)</option><option>July 5, 2026 (Sunday)</option></select></label>
+                <label><span>Payment Method</span><select required><option value="">Select payment method</option><option>GCash</option><option>Bank Transfer</option><option>Cash</option></select></label>
+                <label><span>Amount Paid</span><input type="number" min="250" step="1" value="250" required /></label>
+                <label><span>Reference Number</span><input type="text" placeholder="Enter GCash or bank reference number" required /></label>
+                <label><span>Notes (Optional)</span><textarea placeholder="Add any notes about your payment"></textarea></label>
+              </div>
+              <label class="upload-drop"><span><strong>Click to upload</strong> or drag and drop<br />PNG, JPG, JPEG, or PDF up to 5MB</span><input type="file" accept="image/png,image/jpeg,.pdf" required /></label>
+              <div class="form-actions"><button type="reset">Cancel</button><button class="button primary" type="submit">Submit Payment</button></div>
+            </form>
+            <aside class="card section">
+              <h2>Upload Guidelines</h2>
+              <p class="subtitle">Please follow these guidelines when uploading your payment proof.</p>
+              <div style="margin-top:18px">
+                <div class="guideline"><div class="guideline-icon">✓</div><div><b>Clear Image</b><p class="subtitle">Ensure all payment details are readable.</p></div></div>
+                <div class="guideline"><div class="guideline-icon">PDF</div><div><b>Accepted Formats</b><p class="subtitle">PNG, JPG, JPEG, or PDF files only.</p></div></div>
+                <div class="guideline"><div class="guideline-icon">5MB</div><div><b>File Size</b><p class="subtitle">Maximum file size is 5MB.</p></div></div>
+                <div class="guideline"><div class="guideline-icon">#</div><div><b>Required Information</b><p class="subtitle">Proof must show amount, date, and reference number.</p></div></div>
+              </div>
+            </aside>
+          </div>
         </section>
       </main>
     </div>
-    <a class="upload-fab" href="README.md">Upload<br />Receipt</a>
+    <a class="upload-fab" href="#upload-payment">Upload<br />Receipt</a>
+    <script>
+      const pages = {
+        dashboard: document.getElementById("dashboard-page"),
+        "upload-payment": document.getElementById("upload-payment-page"),
+      };
+      const title = document.getElementById("page-title");
+      const subtitle = document.getElementById("page-subtitle");
+      const navLinks = Array.from(document.querySelectorAll("[data-page-link]"));
+      const pageCopy = {
+        dashboard: ["Dashboard", "Overview of all member payments"],
+        "upload-payment": ["Upload Payment", "Submit your weekly contribution payment"],
+      };
+
+      function renderPage() {
+        const hash = (window.location.hash || "#dashboard").slice(1);
+        const pageName = hash === "upload-payment" ? "upload-payment" : "dashboard";
+        Object.entries(pages).forEach(([name, page]) => { page.hidden = name !== pageName; });
+        [title.textContent, subtitle.textContent] = pageCopy[pageName];
+        navLinks.forEach((link) => link.classList.toggle("active", link.getAttribute("href") === `#${hash}` || (pageName === "dashboard" && link.getAttribute("href") === "#dashboard" && !["members", "schedule", "receipts", "summary"].includes(hash))));
+        if (pageName === "dashboard" && hash && hash !== "dashboard") {
+          requestAnimationFrame(() => document.getElementById(hash)?.scrollIntoView({ behavior: "smooth", block: "start" }));
+        } else {
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        }
+      }
+
+      document.getElementById("static-payment-form").addEventListener("submit", (event) => {
+        event.preventDefault();
+        alert("Static preview only. Run npm run dev and use /upload-payment to submit real payments.");
+      });
+      window.addEventListener("hashchange", renderPage);
+      renderPage();
+    </script>
   </body>
 </html>
